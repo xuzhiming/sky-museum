@@ -1,12 +1,12 @@
 {
- "tris": 481655,
+ "tris": 474283,
  "by_group": {
   "Podium": 200,
-  "D_Panels": 83200,
-  "Shell_Frame": 62624,
-  "D_Mullions": 54144,
+  "D_Panels": 46340,
+  "Shell_Frame": 110760,
+  "D_Mullions": 35328,
   "Lights_Amber": 38480,
-  "Lights_Cyan": 35102,
+  "Lights_Cyan": 35270,
   "Shell_Glass": 3012,
   "Screens": 40,
   "Portal": 1369,

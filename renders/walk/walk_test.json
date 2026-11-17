@@ -52,8 +52,8 @@
   "console_errors": []
  },
  "log": [
-  "loaded in 2.4 s; bvh True collision tris 187861",
-  "L1 route ok True final 28.25 32.49 z 24.0 L2",
+  "loaded in 2.3 s; bvh True collision tris 187861",
+  "L1 route ok True final 28.07 32.86 z 24.0 L2",
   "NEG balustrade: stopped at y 40.5 z 47.98 -> True",
   "stair route ok True z 64.5 expect 64.5 L4",
   "teleport lobby 0 -149 0.01 L1 grounded True",

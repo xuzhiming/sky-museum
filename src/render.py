@@ -50,14 +50,14 @@ def camera(loc, rot=None, target=None, lens=35, ortho=None):
     bpy.context.scene.camera = cam
     return cam
 
-def light(kind, loc, energy, col=(1, 1, 1), size=1.0, rot=None, target=None):
+def light(kind, loc, energy, col=(1, 1, 1), size=1.0, rot=None, target=None, glossy=False):
     ld = bpy.data.lights.new('L', kind); ld.energy = energy; ld.color = col
     if kind == 'AREA': ld.size = size
     elif hasattr(ld, 'shadow_soft_size'): ld.shadow_soft_size = size
     ob = bpy.data.objects.new('L', ld); bpy.context.scene.collection.objects.link(ob); ob.location = loc
     if rot: ob.rotation_euler = [math.radians(a) for a in rot]
     if target: ob.rotation_euler = (Vector(target) - Vector(loc)).to_track_quat('-Z', 'Y').to_euler()
-    ob.visible_camera = False; ob.visible_glossy = False if kind == 'AREA' else True
+    ob.visible_camera = False; ob.visible_glossy = glossy if kind == 'AREA' else True
     return ob
 
 def mask_override():
@@ -94,7 +94,7 @@ def render_to(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     bpy.context.scene.render.filepath = path; bpy.ops.render.render(write_still=True)
 
-def ground(sc, r=8000.0):
+def ground(sc, r=1600.0):   # disc fades to transparent 450-1400 m: the far field shows the dark sky gradient (no grey grazing band)
     """clean studio ground: one dark glossy disc under the museum (no context buildings)"""
     n = 96
     vs = [(0, 0, -0.7)] + [(r * math.cos(2 * math.pi * i / n), r * math.sin(2 * math.pi * i / n), -0.7) for i in range(n)]
@@ -102,7 +102,13 @@ def ground(sc, r=8000.0):
     g = bpy.data.meshes.new('gnd'); g.from_pydata(vs, [], fs)
     go = bpy.data.objects.new('GroundStudio', g); sc.collection.objects.link(go)
     gm = bpy.data.materials.new('gstudio'); gm.use_nodes = True; bs = gm.node_tree.nodes['Principled BSDF']
-    bs.inputs['Base Color'].default_value = (0.006, 0.007, 0.012, 1); bs.inputs['Roughness'].default_value = 0.22; bs.inputs['Metallic'].default_value = 0.0
+    bs.inputs['Base Color'].default_value = (0.006, 0.007, 0.012, 1); bs.inputs['Roughness'].default_value = 0.35; bs.inputs['Metallic'].default_value = 0.0; bs.inputs['Specular IOR Level'].default_value = 0.12
+    nt = gm.node_tree; outn = nt.nodes['Material Output']
+    tc = nt.nodes.new('ShaderNodeTexCoord'); ln = nt.nodes.new('ShaderNodeVectorMath'); ln.operation = 'LENGTH'
+    mr = nt.nodes.new('ShaderNodeMapRange'); mr.inputs['From Min'].default_value = 450.0; mr.inputs['From Max'].default_value = 1400.0
+    tr = nt.nodes.new('ShaderNodeBsdfTransparent'); mx = nt.nodes.new('ShaderNodeMixShader')
+    nt.links.new(tc.outputs['Object'], ln.inputs[0]); nt.links.new(ln.outputs['Value'], mr.inputs['Value']); nt.links.new(mr.outputs['Result'], mx.inputs[0])
+    nt.links.new(bs.outputs[0], mx.inputs[1]); nt.links.new(tr.outputs[0], mx.inputs[2]); nt.links.new(mx.outputs[0], outn.inputs['Surface'])
     g.materials.append(gm)
 
 def bloom(sc, strength=0.55, threshold=1.2, size=0.62):
@@ -127,7 +133,17 @@ def night_world(sc, strength=1.0):
     lp = nt.nodes.new('ShaderNodeLightPath'); mix = nt.nodes.new('ShaderNodeMix'); mix.data_type = 'RGBA'
     mix.inputs['B'].default_value = (0.0, 0.0, 0.0, 1)
     nt.links.new(lp.outputs['Is Camera Ray'], mix.inputs['Factor'])
-    mix.inputs['A'].default_value = (0.012, 0.016, 0.035, 1)
+    # lighting / reflection rays: HDRI-ish night dome so the titanium reads silver (bright cool horizon band, warm city glow below, navy zenith)
+    tg = nt.nodes.new('ShaderNodeTexCoord'); sg = nt.nodes.new('ShaderNodeSeparateXYZ'); rg = nt.nodes.new('ShaderNodeValToRGB')
+    mr = nt.nodes.new('ShaderNodeMapRange'); mr.inputs['From Min'].default_value = -1.0; mr.inputs['From Max'].default_value = 1.0
+    nt.links.new(tg.outputs['Generated'], sg.inputs['Vector']); nt.links.new(sg.outputs['Z'], mr.inputs['Value']); nt.links.new(mr.outputs['Result'], rg.inputs['Fac'])
+    E = rg.color_ramp.elements
+    E[0].position = 0.0; E[0].color = (0.12, 0.09, 0.07, 1)
+    E[1].position = 1.0; E[1].color = (0.10, 0.12, 0.22, 1)
+    e2 = E.new(0.47); e2.color = (0.40, 0.28, 0.20, 1)
+    e3 = E.new(0.52); e3.color = (0.55, 0.60, 0.75, 1)
+    e4 = E.new(0.66); e4.color = (0.30, 0.34, 0.50, 1)
+    nt.links.new(rg.outputs['Color'], mix.inputs['A'])
     nt.links.new(ramp.outputs['Color'], mix.inputs['B'])
     nt.links.new(mix.outputs['Result'], bg.inputs['Color']); bg.inputs['Strength'].default_value = strength
 
@@ -139,6 +155,14 @@ def uplights(scale=1.0):
         r = 215.0
         light('AREA', (r * math.cos(a), r * math.sin(a), 2.0), 2.5e5 * scale, (1.0, 0.72, 0.45) if k % 2 else (0.45, 0.8, 1.0), size=60,
               target=(0.5 * r * math.cos(a), 0.5 * r * math.sin(a), 160.0))
+
+def metal_lights(scale=1.0, focus=(0, 0, 150)):
+    """rim + key lights so the exoskeleton catches light: two cool rims from behind, one warm key front-left, one top fill"""
+    fx, fy, fz = focus
+    light('AREA', (fx + 420, fy + 380, fz + 260), 4.5e6 * scale, (0.75, 0.85, 1.0), size=120, target=focus, glossy=True)
+    light('AREA', (fx - 420, fy + 380, fz + 200), 3.5e6 * scale, (0.75, 0.85, 1.0), size=120, target=focus, glossy=True)
+    light('AREA', (fx - 360, fy - 420, fz + 80), 3.0e6 * scale, (1.0, 0.85, 0.7), size=160, target=focus, glossy=True)
+    light('AREA', (fx, fy - 100, fz + 650), 1.0e6 * scale, (0.8, 0.85, 1.0), size=200, target=focus, glossy=False)
 
 def dof(cam_ob, dist, fstop):
     c = cam_ob.data; c.dof.use_dof = True; c.dof.focus_distance = dist; c.dof.aperture_fstop = fstop
@@ -163,18 +187,19 @@ def beauty(v, tag, samples, scale):
     screen_backs()
     out = None
     if v == 'hero':
-        night_world(sc); ground(sc); uplights(); bloom(sc, 0.35, size=0.5)
+        night_world(sc); ground(sc); uplights(); metal_lights(); bloom(sc, 0.35, size=0.5)
         camera((-95, -305, 1.6), target=(0, 0, 178), lens=15)   # low + close: tower fills the frame
+        sc.view_settings.exposure = -0.25
         out = 'hero_night'
     elif v == 'entrance':
         night_world(sc); ground(sc); uplights(0.6); bloom(sc, 0.55)
-        y0 = -P.Ro(0)
+        y0 = -P.Ro(0); metal_lights(0.22, focus=(0, y0, 30)); sc.view_settings.exposure = -0.45
         light('AREA', (0, y0 - 40, 1.0), 4e4, (1.0, 0.75, 0.5), size=30, target=(0, y0, 25))
         cam = camera((34, y0 - 70, 2.2), target=(-2, y0, 26), lens=24); dof(cam, 75, 8.0)
         out = 'entrance_closeup'
     elif v == 'platform':
         night_world(sc); ground(sc); uplights(0.5); bloom(sc, 0.6)
-        o = P.PODS[1]; z = o['z']
+        o = P.PODS[1]; z = o['z']; metal_lights(0.6, focus=(o['x'], o['y'], z))
         light('AREA', (o['x'] - 60, o['y'] - 80, z - 30), 2e5, (0.6, 0.8, 1.0), size=40, target=(o['x'], o['y'], z))
         cam = camera((o['x'] - 105, o['y'] - 120, z - 16), target=(o['x'] + 8, o['y'], z - 4), lens=30); dof(cam, 150, 11.0)
         out = 'platform_closeup'
@@ -194,7 +219,7 @@ def beauty(v, tag, samples, scale):
         out = 'gallery_typical'
     elif v in ('elev_front', 'elev_side'):
         sc.render.resolution_x, sc.render.resolution_y = R((1600, 1800))
-        night_world(sc); ground(sc); uplights(0.8); bloom(sc, 0.55)
+        night_world(sc); ground(sc); uplights(0.8); metal_lights(0.8); bloom(sc, 0.55)
         if v == 'elev_front': camera((0, -1500, 212), rot=(90, 0, 0), ortho=470)
         else: camera((1500, 0, 212), rot=(90, 0, 90), ortho=470)
         out = 'elevation_front' if v == 'elev_front' else 'elevation_side'

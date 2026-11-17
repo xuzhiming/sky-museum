@@ -37,7 +37,10 @@ def panels(acc, g, mats, P00, P10, P01, P11, outward_xy, cw=4.5, ch=4.0, gap=0.1
             base = [bil(P00, P10, P01, P11, a, b) for a, b in ((ua, va), (ub, va), (ub, vb), (ua, vb))]
             r = _h(seed, i, j)
             d0 = depth * (0.85 + 0.3 * r)
-            if angled:
+            if angled == 'blade':   # M4 stepped blades: every column tilts the same way (one vertical edge proud) -> sawtooth plates
+                r = _h(seed, i); d0 = depth * (0.85 + 0.3 * r)
+                dd = [d0 * 0.25, d0 * 1.7, d0 * 1.7, d0 * 0.25]
+            elif angled:
                 k = (i + j) % 3
                 dd = [d0, d0, d0, d0]
                 if k == 1: dd = [d0 * 0.4, d0 * 2.2, d0 * 2.2, d0 * 0.4]
@@ -111,3 +114,43 @@ def _arc_band_c(acc, mat, c, r0, r1, z, seg=2.5):
         q = [(cx + r0 * math.cos(A), cy + r0 * math.sin(A), z), (cx + r1 * math.cos(A), cy + r1 * math.sin(A), z),
              (cx + r1 * math.cos(B), cy + r1 * math.sin(B), z), (cx + r0 * math.cos(B), cy + r0 * math.sin(B), z)]
         acc.add_face(g, mat, q[::-1])
+
+def exo_frame(acc, p0, p1, outward_xy, w=3.4, d=1.9, g='Shell_Frame'):
+    """M1 exoskeleton: heavy brushed-titanium box frame on an arm ridge (real depth), gunmetal back plate,
+    cyan M5 strip recessed in a channel between two silver lips"""
+    p0, p1 = np.array(p0, float), np.array(p1, float)
+    o = np.array([outward_xy[0], outward_xy[1], 0.0]); o /= max(np.linalg.norm(o), 1e-9)
+    dv = p1 - p0; L = np.linalg.norm(dv)
+    if L < 1e-6: return
+    s = np.cross(dv / L, o); s /= max(np.linalg.norm(s), 1e-9)
+    acc.bar(g, 'ti_armor2', p0 + o * 0.3, p1 + o * 0.3, w + 1.6, 0.6, up=o)                 # back plate
+    for sg in (-1, 1):                                                                        # twin silver flanges = channel lips
+        acc.bar(g, 'ti_armor', p0 + o * d * 0.5 + s * sg * (w * 0.5 - 0.6), p1 + o * d * 0.5 + s * sg * (w * 0.5 - 0.6), 1.2, d, up=o)
+    acc.bar(g, 'struct_dark', p0 + o * d * 0.35, p1 + o * d * 0.35, w - 2.4, d * 0.7, up=o)  # channel floor
+    acc.bar('Lights_Cyan', 'strip_cyan', p0 + o * (d * 0.7 + 0.08), p1 + o * (d * 0.7 + 0.08), 0.5, 0.16, up=o)
+
+def joint_plate(acc, p, outward_xy, s=1.0, d=1.9):
+    """node A: bolted titanium joint plate clamping the exoskeleton at a floor station (4 bolts)"""
+    p = np.array(p, float); o = np.array([outward_xy[0], outward_xy[1], 0.0]); o /= max(np.linalg.norm(o), 1e-9)
+    z = np.array([0, 0, 1.0]); sd = np.cross(z, o)
+    acc.bar('Shell_Frame', 'ti_armor2', p - z * 1.4 * s + o * (d + 0.15), p + z * 1.4 * s + o * (d + 0.15), 4.6 * s, 0.4, up=o)
+    for a in (-1, 1):
+        for b in (-1, 1):
+            c = p + z * b * 0.95 * s + sd * a * 1.75 * s + o * (d + 0.4)
+            acc.bar('Shell_Frame', 'brushed', c - o * 0.1, c + o * 0.15, 0.35 * s, 0.35 * s)
+
+def brace(acc, pa, pb, nrm, off=1.1, w=0.7):
+    """diagonal bracing member outside the glass"""
+    pa, pb = np.array(pa, float) + nrm * off, np.array(pb, float) + nrm * off
+    acc.bar('Shell_Frame', 'brushed', pa, pb, w, w, up=nrm)
+
+def buttress(acc, p0, p1, outward_xy, out=2.4, t=2.2, g='Shell_Frame'):
+    """thick triangular metal fin at a base corner: out m proud at z=0, tapering to the facade at z1"""
+    p0 = np.array(p0, float); p1 = np.array(p1, float); o = np.array([outward_xy[0], outward_xy[1], 0.0]); o /= max(np.linalg.norm(o), 1e-9)
+    sd = np.cross(np.array([0, 0, 1.0]), o) * t * 0.5
+    zt = p1 - p0
+    # hexa corners c[ix + 2*iy + 4*iz]: ix = inner/outer, iy = side, iz = bottom/top
+    c = [p0 - sd, p0 + o * out - sd, p0 + sd, p0 + o * out + sd,
+         p0 - sd + zt, p0 + o * 0.25 - sd + zt, p0 + sd + zt, p0 + o * 0.25 + sd + zt]
+    acc.hexa(g, 'ti_armor', c)
+    acc.bar('Lights_Cyan', 'strip_cyan', p0 + o * (out + 0.05) + np.array([0, 0, 0.5]), p0 + o * 0.3 + zt - np.array([0, 0, 0.5]), 0.3, 0.12)

@@ -67,3 +67,4 @@ Residual / known deviations (to re-check against the sheet once it is available)
 |---|---|---|---|
 | d3 | 0.9088 | all OK | after rib depth 1.0 / joint size reduction (width tolerance 5 m: layered ribs stand ~2 m proud per side) |
 | final | 0.9088 | all OK | podium/fan M2/M4/M5 detail; lobe counter changed from peak picking to circular runs > valley+5 m (fan plateaus carry detail ripples that broke `find_peaks`) |
+| m4 | 0.9091 | all OK | metal exoskeleton frames (1.9 m deep), armor coverage, bracing, base buttresses |

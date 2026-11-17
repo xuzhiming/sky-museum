@@ -31,3 +31,12 @@ Rebuild everything: `bash src/final.sh && bash src/rebuild_web.sh && python3 src
 * Presentation renders (Cycles, denoise, AgX, bloom; 1920×1080, elevations 1600×1800): `bash src/final_renders.sh final 128`
   → `renders/{hero_night,entrance_closeup,platform_closeup,atrium_interior,gallery_typical,elevation_front,elevation_side}_final.png`
 * Web LOD: `model.glb` = full detail (LOD0); `model_lod1.glb` / `web/model_web.glb` drop the `D_*` facade-detail groups (panels, mullions).
+
+## Metal exoskeleton pass (task 4, feedback "金属质感的外部构件")
+* Real-depth metal members (`src/detail.py`): `exo_frame` (brushed-titanium box frame on every arm ridge, twin silver flanges forming a channel with the cyan M5 strip),
+  `joint_plate` (node A, bolted plates at each station), `brace` (diagonal X bracing outside the glass), `buttress` (triangular base-corner fins, 0–40 m).
+* M4 armor now covers the ridge half of every flank (large bevelled panels, 0.9 m deep, seams); glass only in the slot between armor and a gunmetal valley frame.
+* Saucers / obs rings: silver rims, gunmetal underside cones + hubs, brushed struts; portal lintel / fins / gable in titanium + gunmetal.
+* Materials: M-01 `ti_armor` light silver-grey (metallic 1, rough 0.30, anisotropic 0.55 render-only), M-02 `ti_armor2`/`ti_panel*` gunmetal, M-05 `struct_dark`.
+* Lighting: HDRI-like night dome for reflection rays (bright cool horizon band, warm glow below), `metal_lights` rim/key area lights; camera still sees the dark sky.
+* `python3 src/metal_sheet.py` → `compare/metal_vs_sheet.png` (sheet front view | model front elevation | hero).
