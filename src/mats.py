@@ -3,20 +3,20 @@ TEX = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tex')
 # name: (albedo(tex or rgb), emission(tex or rgb or None), emission strength, rough, metal, alpha, uv_scale)
 # palette from the sheet's material board: M-01 dark titanium, M-02 brushed metal, M-03 smoked glass, M-04 cyan light strip, M-05 amber light
 MATS = {
- 'titanium':      ((0.26, 0.27, 0.30), None, 0, 0.36, 1.0, 1.0, 12.0),             # M-02 gunmetal cladding
+ 'titanium':      ((0.29, 0.27, 0.255), None, 0, 0.36, 1.0, 1.0, 12.0),             # M-02 gunmetal cladding
  'frame_metal':   ((0.58, 0.60, 0.64), None, 0, 0.28, 1.0, 1.0, 4.0),
  'frame_dark':    ((0.06, 0.065, 0.08), None, 0, 0.4, 0.9, 1.0, 4.0),
  'glass_curtain': ((0.015, 0.03, 0.05), None, 0, 0.03, 0.0, 0.42, 4.0),          # M-03 low-e glass (dark, reflective, see-through)
- 'ti_armor':      ((0.74, 0.76, 0.80), None, 0, 0.26, 1.0, 1.0, 4.0),            # M-01 titanium alloy, light silver-grey (exoskeleton / armor)
- 'ti_armor2':     ((0.24, 0.25, 0.28), None, 0, 0.36, 1.0, 1.0, 4.0),            # M-02 gunmetal armor panels
- 'ti_panel':      ((0.26, 0.27, 0.30), None, 0, 0.34, 1.0, 1.0, 4.0),             # M-02 armor panels (tone variation)
- 'ti_panel2':     ((0.22, 0.23, 0.26), None, 0, 0.38, 1.0, 1.0, 4.0),
- 'ti_panel3':     ((0.30, 0.31, 0.34), None, 0, 0.30, 1.0, 1.0, 4.0),
- 'brushed':       ((0.72, 0.73, 0.76), None, 0, 0.24, 1.0, 1.0, 4.0),             # M-02 brushed metal trim
+ 'ti_armor':      ((0.80, 0.76, 0.70), None, 0, 0.26, 1.0, 1.0, 4.0),            # M-01 titanium alloy, light silver-grey (exoskeleton / armor)
+ 'ti_armor2':     ((0.27, 0.25, 0.235), None, 0, 0.36, 1.0, 1.0, 4.0),            # M-02 gunmetal armor panels
+ 'ti_panel':      ((0.29, 0.27, 0.25), None, 0, 0.34, 1.0, 1.0, 4.0),             # M-02 armor panels (tone variation)
+ 'ti_panel2':     ((0.24, 0.225, 0.21), None, 0, 0.38, 1.0, 1.0, 4.0),
+ 'ti_panel3':     ((0.34, 0.31, 0.28), None, 0, 0.30, 1.0, 1.0, 4.0),
+ 'brushed':       ((0.80, 0.76, 0.70), None, 0, 0.24, 1.0, 1.0, 4.0),             # M-02 brushed metal trim
  'struct_dark':   ((0.12, 0.125, 0.14), None, 0, 0.40, 1.0, 1.0, 4.0),            # M-05 dark structural metal
- 'room_warm':     ((1.0, 0.62, 0.3), (1.0, 0.58, 0.26), 12.0, 0.5, 0.0, 1.0, 4.0), # interior ceiling coves seen through glass
- 'room_warm_hi':  ((1.0, 0.7, 0.4), (1.0, 0.66, 0.34), 20.0, 0.5, 0.0, 1.0, 4.0),
- 'room_warm_lo':  ((1.0, 0.55, 0.25), (1.0, 0.5, 0.2), 6.0, 0.5, 0.0, 1.0, 4.0),
+ 'room_warm':     ((1.0, 0.62, 0.3), (1.0, 0.56, 0.22), 18.0, 0.5, 0.0, 1.0, 4.0), # interior ceiling coves seen through glass
+ 'room_warm_hi':  ((1.0, 0.7, 0.4), (1.0, 0.62, 0.28), 28.0, 0.5, 0.0, 1.0, 4.0),
+ 'room_warm_lo':  ((1.0, 0.55, 0.25), (1.0, 0.5, 0.18), 9.0, 0.5, 0.0, 1.0, 4.0),
  'hood_glass':    ((0.05, 0.09, 0.12), None, 0, 0.02, 0.0, 0.16, 4.0),          # M-03 clear low-iron glass of the entrance hood
  'glass_clear':   ((0.5, 0.7, 0.85), None, 0, 0.03, 0.0, 0.22, 4.0),
  'glass_core':    ((0.3, 0.55, 0.7), (0.2, 0.6, 0.9), 0.03, 0.03, 0.0, 0.14, 4.0),
@@ -25,15 +25,15 @@ MATS = {
  'rail_metal':    ((0.55, 0.56, 0.6), None, 0, 0.3, 1.0, 1.0, 4.0),
  'strip_cyan':    ((0.1, 0.9, 1.0), (0.05, 0.8, 1.0), 14.0, 0.4, 0.0, 1.0, 4.0),
  'strip_cyan_soft': ((0.1, 0.8, 1.0), (0.1, 0.8, 1.0), 4.0, 0.4, 0.0, 1.0, 4.0),
- 'strip_amber_soft': ((1.0, 0.6, 0.25), (1.0, 0.55, 0.2), 3.0, 0.4, 0.0, 1.0, 4.0),
- 'strip_amber':   ((1.0, 0.62, 0.25), (1.0, 0.55, 0.18), 10.0, 0.4, 0.0, 1.0, 4.0),
- 'light_panel':   ((1.0, 0.85, 0.62), (1.0, 0.72, 0.42), 8.0, 0.5, 0.0, 1.0, 4.0),
+ 'strip_amber_soft': ((1.0, 0.6, 0.25), (1.0, 0.52, 0.16), 6.0, 0.4, 0.0, 1.0, 4.0),
+ 'strip_amber':   ((1.0, 0.62, 0.25), (1.0, 0.52, 0.14), 16.0, 0.4, 0.0, 1.0, 4.0),
+ 'light_panel':   ((1.0, 0.85, 0.62), (1.0, 0.66, 0.34), 11.0, 0.5, 0.0, 1.0, 4.0),
  'beacon':        ((1.0, 0.2, 0.3), (1.0, 0.15, 0.25), 30.0, 0.4, 0.0, 1.0, 4.0),
  'cab':           ((1.0, 0.7, 0.4), (1.0, 0.65, 0.3), 5.0, 0.4, 0.0, 1.0, 4.0),
  'door_lift':     ((0.1, 0.5, 0.6), (0.05, 0.6, 0.8), 1.5, 0.3, 0.6, 1.0, 4.0),
  'door_lift_hs':  ((0.6, 0.45, 0.2), (0.9, 0.6, 0.25), 1.2, 0.3, 0.9, 1.0, 4.0),
  'lift_shaft':    ((0.09, 0.1, 0.12), None, 0, 0.4, 0.7, 1.0, 4.0),
- 'gold':          ((1.0, 0.62, 0.2), (1.0, 0.42, 0.06), 0.25, 0.18, 1.0, 1.0, 4.0),
+ 'gold':          ((1.0, 0.62, 0.2), (1.0, 0.42, 0.06), 0.6, 0.18, 1.0, 1.0, 4.0),
  'bronze':        ((0.55, 0.3, 0.1), (1.0, 0.45, 0.1), 0.15, 0.3, 1.0, 1.0, 4.0),
  'holo_cyan':     ((0.2, 0.9, 1.0), (0.2, 0.9, 1.0), 6.0, 0.2, 0.0, 0.8, 4.0),
  'plaza':         ('floor_dark', None, 0, 0.35, 0.2, 1.0, 16.0),

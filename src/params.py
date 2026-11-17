@@ -111,7 +111,8 @@ if __name__ == '__main__':
 # --- exterior details
 CROWN_Z = 410.0; CROWN_R = 18.0     # L30 glass crown 400 -> 410
 ENTRANCE_RECESS = 6.0
-HOOD = dict(half_w=60.0, top_z=112.0, proud=2.5, open_w=34.0, open_h=14.0, n_diag=10, glaze_z=24.0, sign_z=30.0)   # sheet front view: pyramid glass hood over the central third
+ENTRY_HALL = dict(half_w=30.0, y_back=-116.0, floors=('L2', 'L3', 'L4', 'L5'), ring_R=21.0, ring_y=-140.0, ring_z=22.5)   # multi-storey hall behind the hood (L1-L5 void, 0-97.5 m) with the gold ring
+HOOD = dict(half_w=60.0, top_z=112.0, proud=2.5, open_w=34.0, open_h=14.0, n_diag=10, glaze_z=24.0, sign_z=50.0)   # sheet front view: pyramid glass hood over the central third
 DOOR_W, DOOR_H = 12.0, 6.0
 SCREEN_Z = (12.0, 78.0)             # front elevation: media screens ~z 15-85 on the lower faces
 PORTAL_FRAME = dict(leg_x=82.0, eave_z=100.0, eave_x=128.0, peak_z=190.0)   # pentagon frame on the main facade

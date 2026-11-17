@@ -6,7 +6,7 @@
   },
   "balustrade_blocks": {
    "ok": true,
-   "y": 40.498411519469755,
+   "y": 40.497164113463896,
    "z": 47.984989166259766
   },
   "stair_L3_L4": {
@@ -52,8 +52,8 @@
   "console_errors": []
  },
  "log": [
-  "loaded in 2.3 s; bvh True collision tris 190647",
-  "L1 route ok True final 28.21 32.55 z 24.0 L2",
+  "loaded in 2.8 s; bvh True collision tris 190379",
+  "L1 route ok True final 28.14 32.71 z 24.0 L2",
   "NEG balustrade: stopped at y 40.5 z 47.98 -> True",
   "stair route ok True z 64.5 expect 64.5 L4",
   "teleport lobby 0 -149 0.01 L1 grounded True",

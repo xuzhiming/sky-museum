@@ -50,3 +50,14 @@ Rebuild everything: `bash src/final.sh && bash src/rebuild_web.sh && python3 src
 * Contrast: plates are gunmetal (M-02, albedo ~0.25), silver M-01 only on frames/edges; darker navy/purple sky; weaker reflection dome, fill light
   and uplights; bloom lowered; amber interior coves ~1.7× brighter; `hood_glow()` warm hall lights + ring spot.
 * Saucers: thicker discs (6.5 / 8 / 6.5 m), four underside light rings on the cone (amber + one cyan), warm rim glow, more visible glass railings.
+
+## Entrance hall + gold ring, warm grade (task 6)
+* `P.ENTRY_HALL`: multi-storey entrance hall behind the hood — slabs L2–L5 cut over x ±30 m from the facade back to y −116 m
+  (void from the L1 floor to the L6 slab, 0–97.5 m); glass balustrades, top rails, cyan lines and amber edge glow on all new slab edges
+  (`interior.hall_edge_rails`). The hall opens into the L1 lobby, which connects straight to the Ø80 atrium.
+* Second gold ring (`interior.entry_ring`): Ø42 m at y −140, centre z 22.5 (bottom ≈1.5 m on a stepped plinth), facing the hood —
+  the sheet's front-view ring. The Ø36 ring in the main atrium is kept (interior sheet). The podium tip face behind the hood is removed and the
+  two flank faces under the hood are clear glass; doors moved into the hood opening (the old recessed portal glazing is gone).
+* Circulation spec: arm-0 spaces on L2–L5 now reference the floor that remains behind the void (4, −59); walk route L1 detours around the ring plinth.
+* Grade: AgX Punchy look, warm reflection dome, warm rim/key lights (one cool rim kept), 6 of 8 uplights warm, warmer metals
+  (silver 0.80/0.76/0.70, warm gunmetal), amber coves/strips ~1.5× brighter, gold emission 0.6, ring key/back lights (`hood_glow`).

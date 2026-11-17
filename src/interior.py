@@ -198,8 +198,9 @@ def floor_slab_geom(name, z, stairs, up):
         if name != 'L1':
             g = g.difference(circle(P.ATRIUM_R, 96))
             for k, S in stairs.items(): g = g.difference(S.hole())
-        if name in ('L2', 'L3', 'L4', 'L5'):
-            g = g.difference(sbox(-P.ENTRANCE_W / 2 - 6, -400, P.ENTRANCE_W / 2 + 6, -P.Ro(0) + P.ENTRANCE_RECESS + 0.5))
+        if name in P.ENTRY_HALL['floors']:   # entrance hall void behind the pyramid hood (L1 floor up to the L6 slab)
+            E = P.ENTRY_HALL
+            g = g.difference(sbox(-E['half_w'], -400, E['half_w'], E['y_back']))
         return g
     if name == 'L11':
         for k, S in stairs.items(): g = g.difference(S.hole())
@@ -221,6 +222,7 @@ def build_interior(acc):
         g = floor_slab_geom(name, z, stairs, up)
         slab(acc, 'Slabs', 'floor_stone' if name == 'L1' else 'floor_dark', g, z - P.SLAB_T, z, edge_mat='titanium')
         if z >= P.ATRIUM_TOP: upper_floor(acc, name, z, h, prog, up); continue
+        if name in P.ENTRY_HALL['floors']: hall_edge_rails(acc, g, z)
         # ---- atrium edge
         if name != 'L1':
             gaps = [(a, 1.6) for a in esc_gaps.get(name, [])]
@@ -250,7 +252,10 @@ def build_interior(acc):
         for k in range(P.N_ARMS):
             a = P.arm_angle(k); rm = (P.Ri(z) + P.Ro(z)) / 2
             sid = '%s_arm%d' % (name, k)
-            space(sid, 'entrance_hall' if (name == 'L1' and k == 0) else ('hall' if name in ('L1', 'L2') else 'gallery'), name, (rm * math.cos(a) - 4.0 * math.sin(a), rm * math.sin(a) + 4.0 * math.cos(a), z), program=prog)
+            ref = (rm * math.cos(a) - 4.0 * math.sin(a), rm * math.sin(a) + 4.0 * math.cos(a), z)
+            if k == 0 and name in P.ENTRY_HALL['floors']:   # front arm: floor remains only behind the entrance-hall void
+                ref = (4.0, -(RW + 12.0), z)
+            space(sid, 'entrance_hall' if (name == 'L1' and k == 0) else ('hall' if name in ('L1', 'L2') else 'gallery'), name, ref, program=prog)
             ca, sa = math.cos(a), math.sin(a)
             link(ring, sid, 'open' if name == 'L1' else 'door',
                  probes=[dict(t='clear', a=((RW - 2) * ca, (RW - 2) * sa), b=((RW + 2) * ca, (RW + 2) * sa), z=z),
@@ -313,6 +318,7 @@ def build_interior(acc):
     central_core(acc)
     atrium_roof(acc)
     art_ring(acc)
+    entry_ring(acc)
     lobby_fitout(acc)
     return SPEC
 
@@ -333,10 +339,18 @@ def arm_fitout(acc, name, z, h, k):
     a = P.arm_angle(k); F = frame(a, 0.0)
     zc = z + h - P.SLAB_T
     ri = P.Ri(z)
+    void = (k == 0 and name in P.ENTRY_HALL['floors'])
+    umax = -P.ENTRY_HALL['y_back'] - 2.0 if void else 1e9
     # ceiling light lines along the arm
     for v in (-6.0, 6.0):
-        lbox(acc, 'Lights_Amber', 'light_panel', F, RW + 3, P.Ro(zc) - 14, v - 0.25, v + 0.25, zc - 0.1, zc - 0.02)
+        lbox(acc, 'Lights_Amber', 'light_panel', F, RW + 3, min(P.Ro(zc) - 14, umax), v - 0.25, v + 0.25, zc - 0.1, zc - 0.02)
     if name == 'L1' and k == 0: return
+    if void:   # front arm above L1: only the inner part (behind the hall void) keeps a short gallery
+        if name == 'L2': return
+        for q, uu in enumerate(np.arange(RW + 10.0, umax - 8.0, 12.0)):
+            sgn = 1 if q % 2 else -1; v = sgn * 9.0
+            lbox(acc, 'Exhibits', 'wall_light', F, uu, uu + 7.0, v - 0.2, v + 0.2, z, z + min(5.5, h - 3.0))
+        return
     if name in ('L1', 'L2'):
         # service / shop counters
         lbox(acc, 'Exhibits', 'titanium', F, ri - 4, ri + 8, -9, -7.5, z, z + 1.1)
@@ -434,32 +448,58 @@ def atrium_roof(acc):
             acc.bar('Lights_Cyan', 'strip_cyan', (r0 * math.cos(A) * 0.995, r0 * math.sin(A) * 0.995, z0 - 0.05), (c1[0] + r1 * math.cos(A), c1[1] + r1 * math.sin(A), z1 - 0.05), 0.25, 0.08)
     arc_band(acc, 'Lights_Amber', 'strip_amber', r0 - 0.6, r0, 0, 2 * math.pi, z0 - 0.05, down=True)
 
-def art_ring(acc):
-    """interior sheet: thick vertical golden ring Ø≈36 standing on the atrium floor (faces the entrance)"""
-    z = P.ART_RING_Z; Rt = P.ART_RING_R - 5.5
-    torus(acc, 'Art', 'gold', Rt, 5.5, (0, 0, z), tilt=(math.radians(90), 0), n=72, m=16)
-    torus(acc, 'Art', 'strip_amber', Rt - 5.6, 0.25, (0, -0.0, z), tilt=(math.radians(90), 0), n=48, m=6)
+def art_ring(acc, y=0.0, z=None, R=None, plinth_g='Art'):
+    """interior sheet: thick vertical golden ring standing on a plinth, facing the entrance (atrium ring Ø36; entrance-hall ring Ø42)"""
+    z = P.ART_RING_Z if z is None else z; R = P.ART_RING_R if R is None else R
+    Rt = R - 5.5
+    torus(acc, 'Art', 'gold', Rt, 5.5, (0, y, z), tilt=(math.radians(90), 0), n=72, m=16)
+    torus(acc, 'Art', 'strip_amber', Rt - 5.6, 0.25, (0, y, z), tilt=(math.radians(90), 0), n=48, m=6)
     for s in (-1, 1):
-        torus(acc, 'Art', 'strip_cyan', Rt, 0.2, (0, s * 5.55, z), tilt=(math.radians(90), 0), n=72, m=5)
-    acc.box('Art', 'titanium', -6.0, -4.0, 0.0, 6.0, 4.0, z - P.ART_RING_R + 1.2)
+        torus(acc, 'Art', 'strip_cyan', Rt, 0.2, (0, y + s * 5.55, z), tilt=(math.radians(90), 0), n=72, m=5)
+    acc.box(plinth_g, 'titanium', -6.0, y - 4.0, 0.0, 6.0, y + 4.0, z - R + 1.2)
     # ornament: radial blades (gear teeth) around the outer rim + inner filigree ring, bronze/dark inlay
     for i in range(72):
         a = 2 * math.pi * i / 72; ca, sa = math.cos(a), math.sin(a)
         for s_ in (-1, 1):
-            p0 = (ca * (Rt + 3.2), s_ * 4.2, z + sa * (Rt + 3.2)); p1 = (ca * (Rt + 6.4), s_ * 2.4, z + sa * (Rt + 6.4))
+            p0 = (ca * (Rt + 3.2), y + s_ * 4.2, z + sa * (Rt + 3.2)); p1 = (ca * (Rt + 6.4), y + s_ * 2.4, z + sa * (Rt + 6.4))
             acc.bar('Art', 'bronze' if i % 2 else 'gold', p0, p1, 0.5, 0.35, up=(0, 1, 0))
-        acc.bar('Art', 'struct_dark', (ca * (Rt - 5.0), -2.5, z + sa * (Rt - 5.0)), (ca * (Rt - 6.2), 2.5, z + sa * (Rt - 6.2)), 0.35, 0.35) if i % 3 == 0 else None
-    torus(acc, 'Art', 'bronze', Rt + 5.6, 0.45, (0, 0, z), tilt=(math.radians(90), 0), n=96, m=6)
-    arc_band(acc, 'Lights_Amber', 'strip_amber', 9.6, 10.0, 0, 2 * math.pi, 0.02)
+        acc.bar('Art', 'struct_dark', (ca * (Rt - 5.0), y - 2.5, z + sa * (Rt - 5.0)), (ca * (Rt - 6.2), y + 2.5, z + sa * (Rt - 6.2)), 0.35, 0.35) if i % 3 == 0 else None
+    torus(acc, 'Art', 'bronze', Rt + 5.6, 0.45, (0, y, z), tilt=(math.radians(90), 0), n=96, m=6)
+    if y == 0.0: arc_band(acc, 'Lights_Amber', 'strip_amber', 9.6, 10.0, 0, 2 * math.pi, 0.02)
+
+def entry_ring(acc):
+    """sheet front view: big gold ring filling the pyramid hood, in the multi-storey entrance hall (second ring; the Ø36 atrium ring stays)"""
+    E = P.ENTRY_HALL
+    art_ring(acc, y=E['ring_y'], z=E['ring_z'], R=E['ring_R'], plinth_g='Exhibits')
+    acc.box('Exhibits', 'ti_armor2', -10.0, E['ring_y'] - 6.0, 0.0, 10.0, E['ring_y'] + 6.0, 0.6)       # stepped base
+    acc.box('Lights_Amber', 'strip_amber', -10.05, E['ring_y'] - 6.05, 0.45, 10.05, E['ring_y'] + 6.05, 0.55)
+    # warm cove lights on the hall walls / void edges (read gold through the hood glass)
+    for x in (-E['half_w'] + 0.6, E['half_w'] - 0.6):
+        acc.box('Lights_Amber', 'light_panel', x - 0.1, E['ring_y'] - 20, 30.0, x + 0.1, E['ring_y'] + 20, 30.4)
+
+def hall_edge_rails(acc, g, z):
+    """glass balustrade + top rail + cyan line + amber slab-edge glow along the entrance-hall void edges"""
+    from shapely.geometry import LineString
+    E = P.ENTRY_HALL; X, Yb = E['half_w'] + 0.2, E['y_back'] + 0.2
+    for ln in (LineString([(-X, -400), (-X, Yb)]), LineString([(X, -400), (X, Yb)]), LineString([(-X, Yb), (X, Yb)])):
+        seg = ln.intersection(g)
+        parts = list(seg.geoms) if hasattr(seg, 'geoms') else [seg]
+        for pc in parts:
+            if pc.is_empty or pc.length < 0.5: continue
+            (x0, y0), (x1, y1) = pc.coords[0], pc.coords[-1]
+            wall(acc, 'Rails', 'rail_glass', (x0, y0), (x1, y1), z, z + 1.1, 0.06)
+            acc.bar('Rails', 'brushed', (x0, y0, z + 1.15), (x1, y1, z + 1.15), 0.12, 0.1)
+            acc.bar('Lights_Cyan', 'strip_cyan', (x0, y0, z + 1.05), (x1, y1, z + 1.05), 0.08, 0.06)
+            acc.bar('Lights_Amber', 'strip_amber', (x0, y0, z - 0.4), (x1, y1, z - 0.4), 0.1, 0.25)
 
 def lobby_fitout(acc):
     # reception desk (arc) + info pylon in the L1 lobby, front side of the atrium
     for a0 in (math.radians(-130), math.radians(-60)):
         arc_wall(acc, 'Exhibits', 'titanium', 30.0, a0, a0 + math.radians(20), 0, 1.1, t=1.2, seg_len=2.0)
         arc_wall(acc, 'Lights_Amber', 'strip_amber', 29.35, a0, a0 + math.radians(20), 0.85, 1.0, t=0.05, seg_len=2.0)
-    for x in (-24.0, 24.0):
-        acc.box('Exhibits', 'frame_dark', x - 1.5, -150, 0, x + 1.5, -149.4, 7.0)
-        acc.add_face('Screens', 'screen_sign', [(x - 1.4, -150.05, 1.0), (x + 1.4, -150.05, 1.0), (x + 1.4, -150.05, 6.8), (x - 1.4, -150.05, 6.8)])
+    for x in (-40.0, 40.0):
+        acc.box('Exhibits', 'frame_dark', x - 1.5, -130, 0, x + 1.5, -129.4, 7.0)
+        acc.add_face('Screens', 'screen_sign', [(x - 1.4, -130.05, 1.0), (x + 1.4, -130.05, 1.0), (x + 1.4, -130.05, 6.8), (x - 1.4, -130.05, 6.8)])
 
 def upper_floor(acc, name, z, h, prog, up):
     """L11-L30: open galleries around the leaning central core, display walls on the diagonal arms"""

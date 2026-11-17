@@ -49,7 +49,7 @@ with sync_playwright() as p:
     # ---- 1. L1: plaza -> entrance door -> lobby -> atrium -> escalator -> L2
     pg.evaluate('window.__walk.teleport("plaza")'); time.sleep(0.8)
     pg.screenshot(path=SH + '01_plaza.png')
-    ok, s = route('L1', [(0, YT - 6, 0.8, True), (0, YT + P.ENTRANCE_RECESS + 4, 0.6), (0, -120, 0.8, True), (0, -50, 0.8, True), (0, -25, 0.8), (25, -12, 0.7), (30, -16.6, 0.4), (30, 24.9, 0.4), (30, 29.0, 0.6), (28, 33, 0.6)], shots=(1, 2, 4, 6, 7))
+    ok, s = route('L1', [(0, YT - 6, 0.8, True), (0, YT + P.ENTRANCE_RECESS + 4, 0.6), (-27, -158, 0.8, True), (-27, -124, 0.8, True), (0, -114, 0.8, True), (0, -50, 0.8, True), (0, -25, 0.8), (25, -12, 0.7), (30, -16.6, 0.4), (30, 24.9, 0.4), (30, 29.0, 0.6), (28, 33, 0.6)], shots=(1, 2, 3, 6, 8, 9))
     L('L1 route ok', ok, 'final', round(s['x'], 2), round(s['y'], 2), 'z', round(s['z'], 2), s['floor'])
     res['L1_to_L2'] = dict(ok=ok and abs(s['z'] - 24.0) < 0.3, z=s['z'])
     pg.evaluate('window.__walk.setLook(2.4, -0.25)'); time.sleep(0.5); pg.screenshot(path=SH + '02_L2_atrium_view.png')

@@ -69,3 +69,4 @@ Residual / known deviations (to re-check against the sheet once it is available)
 | final | 0.9088 | all OK | podium/fan M2/M4/M5 detail; lobe counter changed from peak picking to circular runs > valley+5 m (fan plateaus carry detail ripples that broke `find_peaks`) |
 | m4 | 0.9091 | all OK | metal exoskeleton frames (1.9 m deep), armor coverage, bracing, base buttresses |
 | final (task 5) | see scores_final.json | | pyramid hood, gunmetal plates, thicker saucers |
+| final (task 6) | 0.9089 (g1) | all OK | entrance hall void + Ø42 entrance ring, warm grade |

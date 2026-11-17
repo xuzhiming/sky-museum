@@ -34,13 +34,14 @@ def build_exterior(acc):
             mid = ((pa0[0] + pa1[0]) / 2, (pa0[1] + pa1[1]) / 2 - ca)
             kind = i % 3          # 0 tip face, 1 tip->valley, 2 valley->tip
             if podium:
-                if i == 0:        # front arm tip: entrance portal (full 48 m opening)
-                    L = math.dist(pa0, pa1); f0 = (L - P.ENTRANCE_W) / 2 / L
-                    for (s0, s1) in ((0, f0), (1 - f0, 1)):
-                        acc.add_face('Podium', 'titanium', [(*lerp(pa0, pa1, s0), a), (*lerp(pa0, pa1, s1), a), (*lerp(pb0, pb1, s1), b), (*lerp(pb0, pb1, s0), b)])
-                        D.panels(acc, 'D_Panels', TI, *Q, mid, u0=s0, u1=s1, seed=i * 7 + a)
+                if i == 0:        # front arm tip: open behind the pyramid hood (the hood glass is the enclosure; entrance hall + gold ring behind)
                     continue
-                SCR = (1, n - 1, 4, n - 4, 7, n - 7, 10, n - 10)   # faces carrying M2 media screens (see media_screens)
+                if i in (1, n - 1):   # flanks under the hood: clear glass + mullions only, so the entrance-hall ring reads through
+                    acc.add_face('Podium', 'hood_glass', [(*pa0, a), (*pa1, a), (*pb1, b), (*pb0, b)])
+                    D.mullion_grid(acc, *Q, mid, du=4.0, transoms=(0.5,), g='D_Mullions')
+                    acc.bar('Shell_Frame', 'ti_armor2', (*pa0, a), (*pa1, a), 0.5, 0.7)
+                    continue
+                SCR = (4, n - 4, 7, n - 7, 10, n - 10)   # faces carrying M2 media screens (see media_screens; 1 / n-1 sit under the hood)
                 acc.add_face('Podium', 'titanium' if (kind == 0 or i in SCR) else 'glass_curtain', [(*pa0, a), (*pa1, a), (*pb1, b), (*pb0, b)])
                 nrm = D.quad_normal(*Q[:3], mid)
                 if kind == 0:     # podium arm tip: M4 angled armor + M5 cyan channel (as on the tower)
@@ -139,7 +140,7 @@ def media_screens(acc):
     ZS0, ZS1 = 24.0, 46.0    # screen band kept inside one near-planar facade segment (the 0-24 m podium bulges ~4 m beyond a 0-47 chord)
     S = P.star(ZS0); S48 = P.star(ZS1)
     n = 3 * P.N_ARMS
-    picks = [(1, 'screen_a'), (n - 1, 'screen_b'), (4, 'screen_c'), (n - 4, 'screen_d'), (7, 'screen_b'), (n - 7, 'screen_a'), (10, 'screen_c'), (n - 10, 'screen_d')]
+    picks = [(4, 'screen_c'), (n - 4, 'screen_d'), (7, 'screen_b'), (n - 7, 'screen_a'), (10, 'screen_c'), (n - 10, 'screen_d')]
     for i, mat in picks:
         j = (i + 1) % n
         z0, z1 = ZS0 + 1.0, P.SCREEN_Z[1]
@@ -162,26 +163,23 @@ def media_screens(acc):
 def portal(acc):
     """M6 entrance: recessed glazing + doors under a canopy at the foot of the pyramid hood (see hood())"""
     y0 = -P.Ro(0.0); W = P.ENTRANCE_W; H = P.HOOD['glaze_z']; rec = P.ENTRANCE_RECESS
-    for sx in (-1, 1):   # recess side walls (start 1.5 m behind the tip so they stay inside the hood glass)
-        x = sx * W / 2
-        acc.box('Portal', 'ti_armor2', (x - 0.6) if sx < 0 else x, y0 + 1.5, 0, x if sx < 0 else (x + 0.6), y0 + rec, H)
-    # recessed glazing: mullion grid + transoms, doors
-    yc = y0 + rec
+    # glazed entrance screen + doors in the hood's walk-through opening (recessed portal glazing removed: the hall opens behind)
+    h = P.HOOD; OW, OH = h['open_w'] / 2, h['open_h']
+    yg = y0 - h['proud'] + 0.6
     dw, dh = P.DOOR_W, P.DOOR_H
-    for (x0, x1, z0, z1) in ((-W / 2, -dw / 2, 0, H), (dw / 2, W / 2, 0, H), (-dw / 2, dw / 2, dh, H)):
-        acc.box('Entrance_Glass', 'glass_clear', x0, yc - 0.1, z0, x1, yc + 0.1, z1)
-    for x in np.linspace(-W / 2, W / 2, 13):
-        acc.box('Shell_Frame', 'brushed', x - 0.15, yc - 0.5, 0 if abs(x) >= dw / 2 - 0.1 else dh, x + 0.15, yc + 0.2, H)
-    for z in [dh] + list(np.arange(10.0, H, 4.0)):
-        acc.box('Shell_Frame', 'brushed', -W / 2, yc - 0.45, z - 0.12, W / 2, yc + 0.2, z + 0.12)
-    for x in (-dw / 2 + 0.3, -0.15, dw / 2 - 0.3):  # door leaves frames
-        acc.box('Shell_Frame', 'struct_dark', x - 0.15, yc - 0.3, 0, x + 0.15, yc + 0.1, dh)
+    for (x0, x1, z0, z1) in ((-OW, -dw / 2, 0, OH), (dw / 2, OW, 0, OH), (-dw / 2, dw / 2, dh, OH)):
+        acc.box('Entrance_Glass', 'glass_clear', x0, yg - 0.1, z0, x1, yg + 0.1, z1)
+    for x in np.linspace(-OW, OW, 9):
+        if abs(x) < dw / 2 - 0.2: acc.box('Shell_Frame', 'brushed', x - 0.15, yg - 0.3, dh, x + 0.15, yg + 0.3, OH); continue
+        acc.box('Shell_Frame', 'brushed', x - 0.15, yg - 0.3, 0, x + 0.15, yg + 0.3, OH)
+    acc.box('Shell_Frame', 'brushed', -OW, yg - 0.3, dh - 0.15, OW, yg + 0.3, dh + 0.15)
+    for x in (-dw / 2, dw / 2):
+        acc.box('Shell_Frame', 'ti_armor', x - 0.25, yg - 0.4, 0, x + 0.25, yg + 0.4, dh)
     # canopy with underside light grid
     acc.box('Portal', 'ti_armor2', -W / 2 - 1.0, y0 - 4.0, 11.0, W / 2 + 1.0, y0 + rec - 0.3, 12.0)
     acc.box('Lights_Cyan', 'strip_cyan', -W / 2 - 1.0, y0 - 4.1, 11.2, W / 2 + 1.0, y0 - 4.0, 11.8)
     for x in np.linspace(-W / 2 + 2, W / 2 - 2, 6):
         acc.box('Lights_Amber', 'light_panel', x - 0.8, y0 - 3.5, 10.95, x + 0.8, y0 + rec - 1.0, 11.0)
-    acc.box('Portal', 'ti_armor', -W / 2 - 0.6, y0 + 1.5, H, W / 2 + 0.6, y0 + rec, H + 1.2)   # glazing head
     # entry plinth steps + lit bollards
     for k in range(3):
         acc.box('Ground', 'ti_panel', -W / 2 - 4 + k, y0 - 9 + 2 * k, 0.0, W / 2 + 4 - k, y0 + 0.2, 0.05 + 0.0 * k)
