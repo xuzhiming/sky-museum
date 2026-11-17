@@ -16,7 +16,7 @@ spawn = {'plaza': [0, -P.Ro(0) - 41, 0, 0], 'lobby': [0, -P.Ro(0) + 25, 0, 0], '
 label = {'plaza': '广场', 'lobby': 'L1 门厅', 'atrium': 'L1 中庭', 'esc': '扶梯 L1→L2', 'L3': 'L3 环廊', 'L11': 'L11 空中大堂', 'L12': 'L12 核心展廊',
          'L21': 'L21 天空展廊', 'L28': 'L28 观云台', 'L30': 'L30 观云台'}
 TP = dict(spawn=spawn, label=label, order=list(spawn), floors=fl)
-COLL = ['Podium', 'Portal', 'Entrance_Glass', 'Shell_Glass', 'Slabs', 'Slabs_Glass', 'Walls', 'Cores', 'Stairs', 'Escalators', 'Rails', 'Bridges', 'Obs_Decks', 'Pods', 'Fans', 'Atrium_Roof', 'Ground', 'Core_Glass', 'Exhibits', 'Spire']
+COLL = ['Podium', 'Portal', 'Hood', 'Entrance_Glass', 'Shell_Glass', 'Slabs', 'Slabs_Glass', 'Walls', 'Cores', 'Stairs', 'Escalators', 'Rails', 'Bridges', 'Obs_Decks', 'Pods', 'Fans', 'Atrium_Roof', 'Ground', 'Core_Glass', 'Exhibits', 'Spire']
 js = lambda o: json.dumps(o, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/')
 out = t.replace('__TP_JSON__', js(TP)).replace('__COLL_JSON__', js(COLL)).replace('__GLB_BASE64__', g)
 open(r + 'web/preview.html', 'w').write(out)

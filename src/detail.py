@@ -80,7 +80,7 @@ def rib_joint(acc, p, outward_xy, s=1.0):
     acc.bar('Shell_Frame', 'struct_dark', p - np.array([0, 0, 0.9 * s]) + o * 0.3, p + np.array([0, 0, 0.9 * s]) + o * 0.3, 3.2 * s, 2.0 * s)
     acc.bar('Shell_Frame', 'brushed', p - np.array([0, 0, 0.35 * s]) + o * 1.4, p + np.array([0, 0, 0.35 * s]) + o * 1.4, 2.2 * s, 0.25)
 
-def ring_module(acc, c, R, z, t, posts=3.0, brackets=10.0, r_in=None, g='Obs_Decks', bracket_depth=None):
+def ring_module(acc, c, R, z, t, posts=3.0, brackets=10.0, r_in=None, g='Obs_Decks', bracket_depth=None, warm=False):
     """M3 / node B: platform ring fascia + cyan light band, glass balustrade with posts and top rail, under-deck radial brackets,
     concentric underside light rings"""
     from shapes import arc_wall, arc_band
@@ -100,10 +100,12 @@ def ring_module(acc, c, R, z, t, posts=3.0, brackets=10.0, r_in=None, g='Obs_Dec
         a = 2 * math.pi * i / nb; ca, sa = math.cos(a), math.sin(a)
         p_in = (cx + ri * ca, cy + ri * sa); p_out = (cx + (R - 1.2) * ca, cy + (R - 1.2) * sa)
         # triangular bracket: top chord under the deck, diagonal strut back to the wall
-        acc.bar(g, 'struct_dark', (*p_in, z - t - 0.3), (*p_out, z - t - 0.3), 0.7, 0.6)
-        acc.bar(g, 'struct_dark', (*p_in, z - t - bd), (*p_out, z - t - 0.6), 0.6, 0.6)
+        acc.bar(g, 'ti_armor2', (*p_in, z - t - 0.3), (*p_out, z - t - 0.3), 0.7, 0.6)
+        acc.bar(g, 'brushed', (*p_in, z - t - bd), (*p_out, z - t - 0.6), 0.6, 0.6)
         acc.bar(g, 'brushed', (*p_in, z - t - bd - 0.6), (*p_in, z - t), 0.9, 0.9)
-    for rr, mat in ((R - 2.5, 'strip_cyan'), (R * 0.78, 'strip_amber'), (R * 0.62, 'strip_cyan_soft')):
+    rings = ((R - 2.5, 'strip_amber'), (R - 4.5, 'strip_amber'), (R * 0.78, 'strip_amber'), (R * 0.62, 'strip_amber')) if warm else \
+            ((R - 2.5, 'strip_cyan'), (R * 0.78, 'strip_amber'), (R * 0.62, 'strip_cyan_soft'))
+    for rr, mat in rings:
         if rr > ri + 1: _arc_band_c(acc, mat, c, rr - 0.35, rr + 0.35, z - t - 0.08)
 
 def _arc_band_c(acc, mat, c, r0, r1, z, seg=2.5):

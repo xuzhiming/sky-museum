@@ -76,7 +76,7 @@ let tween = null;
 function goTo(v) { const [p, t] = VIEWS[v]; if (WALK.on) exitWalk(); tween = { p0: camera.position.clone(), p1: p, c0: controls.target.clone(), c1: t, t0: performance.now(), dur: 1200 }; }
 document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => goTo(b.dataset.view));
 // groups
-const byName = {}; const SHELL = ['Shell_Glass', 'Shell_Frame', 'Podium', 'Portal', 'Screens', 'Lights_Cyan', 'Obs_Decks', 'Pods', 'Fans', 'Spire', 'Entrance_Glass'];
+const byName = {}; const SHELL = ['Shell_Glass', 'Shell_Frame', 'Podium', 'Portal', 'Screens', 'Lights_Cyan', 'Obs_Decks', 'Pods', 'Fans', 'Spire', 'Entrance_Glass', 'Hood'];
 document.querySelectorAll('[data-grp]').forEach(b => b.onclick = () => { b.classList.toggle('on'); const on = b.classList.contains('on');
   for (const n of TOP) { const isShell = SHELL.includes(n); if ((b.dataset.grp === 'shell') === isShell) byName[n].visible = on; } });
 const TOP = [];

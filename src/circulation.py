@@ -6,7 +6,7 @@ import bpy, bmesh
 from mathutils import Vector
 from mathutils.bvhtree import BVHTree
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
-COLL = ['Podium', 'Portal', 'Entrance_Glass', 'Shell_Glass', 'Slabs', 'Slabs_Glass', 'Walls', 'Cores', 'Stairs', 'Escalators', 'Rails',
+COLL = ['Podium', 'Portal', 'Hood', 'Entrance_Glass', 'Shell_Glass', 'Slabs', 'Slabs_Glass', 'Walls', 'Cores', 'Stairs', 'Escalators', 'Rails',
         'Bridges', 'Obs_Decks', 'Pods', 'Fans', 'Atrium_Roof', 'Ground', 'Core_Glass', 'Exhibits', 'Spire']
 RULES = dict(stair=dict(rmin=0.15, rmax=0.18, tmin=0.28, wmin=1.4, nmax=18, head=2.1), escalator=dict(rmin=0.15, rmax=0.21, tmin=0.30, wmin=1.0, nmax=200, head=2.3))
 

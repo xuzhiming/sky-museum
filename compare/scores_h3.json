@@ -1,0 +1,252 @@
+{
+ "dimension_check": [
+  {
+   "item": "front: total height H",
+   "model": 420.0,
+   "target": 420.0,
+   "err": 0.0,
+   "ok": true
+  },
+  {
+   "item": "front: base width @z=4 (340..362, within 360 envelope)",
+   "model": 359.67,
+   "target": 351.0,
+   "err": 8.67,
+   "ok": true
+  },
+  {
+   "item": "front: base width @z=46 (taper + fans)",
+   "model": 333.33,
+   "target": 329.9,
+   "err": 3.43,
+   "ok": true
+  },
+  {
+   "item": "front: obs ring top z (target 320)",
+   "model": 321.33,
+   "target": 320.0,
+   "err": 1.33,
+   "ok": true
+  },
+  {
+   "item": "front: obs ring top z (target 360)",
+   "model": 361.33,
+   "target": 360.0,
+   "err": 1.33,
+   "ok": true
+  },
+  {
+   "item": "front: obs ring top z (target 400)",
+   "model": 401.33,
+   "target": 400.0,
+   "err": 1.33,
+   "ok": true
+  },
+  {
+   "item": "front: width @z=120 (param Ro)",
+   "model": 242.33,
+   "target": 238.0,
+   "err": 4.33,
+   "ok": true
+  },
+  {
+   "item": "front: width @z=150 (param Ro)",
+   "model": 222.11,
+   "target": 218.0,
+   "err": 4.11,
+   "ok": true
+  },
+  {
+   "item": "front: width @z=220 (param Ro)",
+   "model": 170.33,
+   "target": 166.0,
+   "err": 4.33,
+   "ok": true
+  },
+  {
+   "item": "front: width @z=308 (param Ro)",
+   "model": 110.11,
+   "target": 107.6,
+   "err": 2.51,
+   "ok": true
+  },
+  {
+   "item": "front: width @z=340 (param Ro)",
+   "model": 89.22,
+   "target": 86.0,
+   "err": 3.22,
+   "ok": true
+  },
+  {
+   "item": "front: width @z=385 (param Ro)",
+   "model": 57.67,
+   "target": 55.0,
+   "err": 2.67,
+   "ok": true
+  },
+  {
+   "item": "front: spire present above 410 (top z)",
+   "model": 420.0,
+   "target": 420.0,
+   "err": 0.0,
+   "ok": true
+  },
+  {
+   "item": "right: total height H",
+   "model": 420.0,
+   "target": 420.0,
+   "err": 0.0,
+   "ok": true
+  },
+  {
+   "item": "right: base width @z=4 (340..362, within 360 envelope)",
+   "model": 359.33,
+   "target": 351.0,
+   "err": 8.33,
+   "ok": true
+  },
+  {
+   "item": "right: base width @z=46 (taper + fans)",
+   "model": 332.67,
+   "target": 329.9,
+   "err": 2.77,
+   "ok": true
+  },
+  {
+   "item": "right: obs ring top z (target 320)",
+   "model": 320.0,
+   "target": 320.0,
+   "err": 0.0,
+   "ok": true
+  },
+  {
+   "item": "right: obs ring top z (target 360)",
+   "model": 361.33,
+   "target": 360.0,
+   "err": 1.33,
+   "ok": true
+  },
+  {
+   "item": "right: obs ring top z (target 400)",
+   "model": 401.33,
+   "target": 400.0,
+   "err": 1.33,
+   "ok": true
+  },
+  {
+   "item": "right: width @z=120 (param Ro)",
+   "model": 242.67,
+   "target": 238.0,
+   "err": 4.67,
+   "ok": true
+  },
+  {
+   "item": "right: width @z=150 (param Ro)",
+   "model": 222.0,
+   "target": 218.0,
+   "err": 4.0,
+   "ok": true
+  },
+  {
+   "item": "right: width @z=220 (param Ro)",
+   "model": 170.67,
+   "target": 166.0,
+   "err": 4.67,
+   "ok": true
+  },
+  {
+   "item": "right: width @z=308 (param Ro)",
+   "model": 110.22,
+   "target": 107.6,
+   "err": 2.62,
+   "ok": true
+  },
+  {
+   "item": "right: width @z=340 (param Ro)",
+   "model": 89.11,
+   "target": 86.0,
+   "err": 3.11,
+   "ok": true
+  },
+  {
+   "item": "right: width @z=385 (param Ro)",
+   "model": 57.33,
+   "target": 55.0,
+   "err": 2.33,
+   "ok": true
+  },
+  {
+   "item": "right: spire present above 410 (top z)",
+   "model": 420.0,
+   "target": 420.0,
+   "err": 0.0,
+   "ok": true
+  },
+  {
+   "item": "top: arm/lobe count (r(theta) peaks)",
+   "model": 8.0,
+   "target": 8,
+   "err": 0.0,
+   "ok": true
+  },
+  {
+   "item": "top: valley radius at podium (min r)",
+   "model": 164.0,
+   "target": 163.6,
+   "err": 0.4,
+   "ok": true
+  },
+  {
+   "item": "top: plan extent W (x)",
+   "model": 361.0,
+   "target": 360.0,
+   "err": 1.0,
+   "ok": true
+  },
+  {
+   "item": "top: plan extent D (y)",
+   "model": 361.0,
+   "target": 360.0,
+   "err": 1.0,
+   "ok": true
+  }
+ ],
+ "sheet": [
+  {
+   "view": "front",
+   "iou": 0.9192,
+   "top_err_m": 15.63,
+   "width_err_m": 13.12
+  },
+  {
+   "view": "back",
+   "iou": 0.9451,
+   "top_err_m": 13.99,
+   "width_err_m": 8.66
+  },
+  {
+   "view": "left",
+   "iou": 0.9072,
+   "top_err_m": 22.09,
+   "width_err_m": 15.35
+  },
+  {
+   "view": "right",
+   "iou": 0.9021,
+   "top_err_m": 21.37,
+   "width_err_m": 14.04
+  },
+  {
+   "view": "top",
+   "iou": 0.9379,
+   "top_err_m": 7.94,
+   "width_err_m": 14.99
+  },
+  {
+   "view": "section",
+   "iou": 0.8422,
+   "top_err_m": 32.04,
+   "width_err_m": 29.03
+  }
+ ]
+}

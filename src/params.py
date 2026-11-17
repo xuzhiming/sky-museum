@@ -33,9 +33,9 @@ def yc(z): return _interp(LEAN, z)
 FAN = dict(z1=76.0, half_deg=24.0, r_in_ratio=0.80, top_drop=0.0, r_scale=1.10)   # r_scale capped so the fans stay inside the 360 m elevation width
 
 # saucer pods (exterior sheet: 3 cantilevered disc platforms; drawn positions, see compare_log for the label conflict)
-PODS = [dict(name='P1', z=292.0, x=-71.0, y=70.0, R=36.0, t=4.0),
-        dict(name='P2', z=182.0, x=-98.0, y=35.0, R=48.0, t=5.0),
-        dict(name='P3', z=266.0, x=84.0, y=20.0, R=38.0, t=4.0)]
+PODS = [dict(name='P1', z=292.0, x=-71.0, y=70.0, R=36.0, t=6.5),
+        dict(name='P2', z=182.0, x=-98.0, y=35.0, R=48.0, t=8.0),
+        dict(name='P3', z=266.0, x=84.0, y=20.0, R=38.0, t=6.5)]
 # observation ring decks at the labelled +320 / +360 / +400 levels (L21 / L28 / L30), slim cantilevers around the tower
 OBS = [dict(name='L21', z=320.0, cant=8.0, t=2.0), dict(name='L28', z=360.0, cant=7.0, t=2.0), dict(name='L30', z=400.0, cant=6.0, t=1.6)]
 # twin needle spires (front elevation: two blades at x = +-16 reaching 420)
@@ -111,6 +111,7 @@ if __name__ == '__main__':
 # --- exterior details
 CROWN_Z = 410.0; CROWN_R = 18.0     # L30 glass crown 400 -> 410
 ENTRANCE_RECESS = 6.0
+HOOD = dict(half_w=60.0, top_z=112.0, proud=2.5, open_w=34.0, open_h=14.0, n_diag=10, glaze_z=24.0, sign_z=30.0)   # sheet front view: pyramid glass hood over the central third
 DOOR_W, DOOR_H = 12.0, 6.0
 SCREEN_Z = (12.0, 78.0)             # front elevation: media screens ~z 15-85 on the lower faces
 PORTAL_FRAME = dict(leg_x=82.0, eave_z=100.0, eave_x=128.0, peak_z=190.0)   # pentagon frame on the main facade

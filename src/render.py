@@ -127,9 +127,9 @@ def night_world(sc, strength=1.0):
     tc = nt.nodes.new('ShaderNodeTexCoord'); sep = nt.nodes.new('ShaderNodeSeparateXYZ'); ramp = nt.nodes.new('ShaderNodeValToRGB')
     nt.links.new(tc.outputs['Window'], sep.inputs['Vector']); nt.links.new(sep.outputs['Y'], ramp.inputs['Fac'])
     el = ramp.color_ramp.elements
-    el[0].position = 0.0; el[0].color = (0.03, 0.022, 0.055, 1)
-    el[1].position = 1.0; el[1].color = (0.004, 0.007, 0.02, 1)
-    e = el.new(0.35); e.color = (0.022, 0.024, 0.06, 1)
+    el[0].position = 0.0; el[0].color = (0.034, 0.018, 0.062, 1)
+    el[1].position = 1.0; el[1].color = (0.002, 0.003, 0.012, 1)
+    e = el.new(0.35); e.color = (0.012, 0.013, 0.042, 1)
     lp = nt.nodes.new('ShaderNodeLightPath'); mix = nt.nodes.new('ShaderNodeMix'); mix.data_type = 'RGBA'
     mix.inputs['B'].default_value = (0.0, 0.0, 0.0, 1)
     nt.links.new(lp.outputs['Is Camera Ray'], mix.inputs['Factor'])
@@ -138,11 +138,11 @@ def night_world(sc, strength=1.0):
     mr = nt.nodes.new('ShaderNodeMapRange'); mr.inputs['From Min'].default_value = -1.0; mr.inputs['From Max'].default_value = 1.0
     nt.links.new(tg.outputs['Generated'], sg.inputs['Vector']); nt.links.new(sg.outputs['Z'], mr.inputs['Value']); nt.links.new(mr.outputs['Result'], rg.inputs['Fac'])
     E = rg.color_ramp.elements
-    E[0].position = 0.0; E[0].color = (0.12, 0.09, 0.07, 1)
-    E[1].position = 1.0; E[1].color = (0.10, 0.12, 0.22, 1)
-    e2 = E.new(0.47); e2.color = (0.40, 0.28, 0.20, 1)
-    e3 = E.new(0.52); e3.color = (0.55, 0.60, 0.75, 1)
-    e4 = E.new(0.66); e4.color = (0.30, 0.34, 0.50, 1)
+    E[0].position = 0.0; E[0].color = (0.05, 0.035, 0.03, 1)
+    E[1].position = 1.0; E[1].color = (0.02, 0.025, 0.06, 1)
+    e2 = E.new(0.47); e2.color = (0.20, 0.13, 0.08, 1)
+    e3 = E.new(0.52); e3.color = (0.36, 0.40, 0.52, 1)
+    e4 = E.new(0.62); e4.color = (0.07, 0.08, 0.15, 1)
     nt.links.new(rg.outputs['Color'], mix.inputs['A'])
     nt.links.new(ramp.outputs['Color'], mix.inputs['B'])
     nt.links.new(mix.outputs['Result'], bg.inputs['Color']); bg.inputs['Strength'].default_value = strength
@@ -161,8 +161,15 @@ def metal_lights(scale=1.0, focus=(0, 0, 150)):
     fx, fy, fz = focus
     light('AREA', (fx + 420, fy + 380, fz + 260), 4.5e6 * scale, (0.75, 0.85, 1.0), size=120, target=focus, glossy=True)
     light('AREA', (fx - 420, fy + 380, fz + 200), 3.5e6 * scale, (0.75, 0.85, 1.0), size=120, target=focus, glossy=True)
-    light('AREA', (fx - 360, fy - 420, fz + 80), 3.0e6 * scale, (1.0, 0.85, 0.7), size=160, target=focus, glossy=True)
-    light('AREA', (fx, fy - 100, fz + 650), 1.0e6 * scale, (0.8, 0.85, 1.0), size=200, target=focus, glossy=False)
+    light('AREA', (fx - 360, fy - 420, fz + 80), 1.6e6 * scale, (1.0, 0.85, 0.7), size=160, target=focus, glossy=True)
+    light('AREA', (fx, fy - 100, fz + 650), 0.15e6 * scale, (0.8, 0.85, 1.0), size=200, target=focus, glossy=False)
+
+def hood_glow(scale=1.0):
+    """warm hall light behind the hood glass + spot on the atrium gold ring (seen through the lobby)"""
+    y0 = -P.Ro(0)
+    for x in (-24, 0, 24): light('POINT', (x, y0 + 14, 28), 7e4 * scale, (1.0, 0.7, 0.4), size=8)
+    light('POINT', (0, y0 + 30, 10), 1.2e5 * scale, (1.0, 0.72, 0.42), size=6)
+    light('AREA', (0, -30, 6), 2.5e5 * scale, (1.0, 0.75, 0.45), size=20, target=(0, 0, P.ART_RING_Z))
 
 def dof(cam_ob, dist, fstop):
     c = cam_ob.data; c.dof.use_dof = True; c.dof.focus_distance = dist; c.dof.aperture_fstop = fstop
@@ -187,19 +194,19 @@ def beauty(v, tag, samples, scale):
     screen_backs()
     out = None
     if v == 'hero':
-        night_world(sc); ground(sc); uplights(); metal_lights(); bloom(sc, 0.35, size=0.5)
+        night_world(sc); ground(sc); uplights(0.45); metal_lights(); hood_glow(); bloom(sc, 0.25, size=0.5)
         camera((-95, -305, 1.6), target=(0, 0, 178), lens=15)   # low + close: tower fills the frame
         sc.view_settings.exposure = -0.25
         out = 'hero_night'
     elif v == 'entrance':
-        night_world(sc); ground(sc); uplights(0.6); bloom(sc, 0.55)
+        night_world(sc); ground(sc); uplights(0.35); hood_glow(); bloom(sc, 0.4)
         y0 = -P.Ro(0); metal_lights(0.22, focus=(0, y0, 30)); sc.view_settings.exposure = -0.45
         light('AREA', (0, y0 - 40, 1.0), 4e4, (1.0, 0.75, 0.5), size=30, target=(0, y0, 25))
         cam = camera((34, y0 - 70, 2.2), target=(-2, y0, 26), lens=24); dof(cam, 75, 8.0)
         out = 'entrance_closeup'
     elif v == 'platform':
-        night_world(sc); ground(sc); uplights(0.5); bloom(sc, 0.6)
-        o = P.PODS[1]; z = o['z']; metal_lights(0.6, focus=(o['x'], o['y'], z))
+        night_world(sc); ground(sc); uplights(0.3); bloom(sc, 0.45)
+        o = P.PODS[1]; z = o['z']; metal_lights(0.4, focus=(o['x'], o['y'], z))
         light('AREA', (o['x'] - 60, o['y'] - 80, z - 30), 2e5, (0.6, 0.8, 1.0), size=40, target=(o['x'], o['y'], z))
         cam = camera((o['x'] - 105, o['y'] - 120, z - 16), target=(o['x'] + 8, o['y'], z - 4), lens=30); dof(cam, 150, 11.0)
         out = 'platform_closeup'
@@ -219,7 +226,7 @@ def beauty(v, tag, samples, scale):
         out = 'gallery_typical'
     elif v in ('elev_front', 'elev_side'):
         sc.render.resolution_x, sc.render.resolution_y = R((1600, 1800))
-        night_world(sc); ground(sc); uplights(0.8); metal_lights(0.8); bloom(sc, 0.55)
+        night_world(sc); ground(sc); uplights(0.4); metal_lights(0.8); hood_glow(); bloom(sc, 0.4)
         if v == 'elev_front': camera((0, -1500, 212), rot=(90, 0, 0), ortho=470)
         else: camera((1500, 0, 212), rot=(90, 0, 90), ortho=470)
         out = 'elevation_front' if v == 'elev_front' else 'elevation_side'

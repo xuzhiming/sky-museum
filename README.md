@@ -40,3 +40,13 @@ Rebuild everything: `bash src/final.sh && bash src/rebuild_web.sh && python3 src
 * Materials: M-01 `ti_armor` light silver-grey (metallic 1, rough 0.30, anisotropic 0.55 render-only), M-02 `ti_armor2`/`ti_panel*` gunmetal, M-05 `struct_dark`.
 * Lighting: HDRI-like night dome for reflection rays (bright cool horizon band, warm glow below), `metal_lights` rim/key area lights; camera still sees the dark sky.
 * `python3 src/metal_sheet.py` → `compare/metal_vs_sheet.png` (sheet front view | model front elevation | hero).
+
+## Sheet front-view pass (task 5)
+* `hood()` (`src/exterior.py`, `P.HOOD`): pyramid glass entrance hood over the central third of the base (half-width 60 m at z 0, apex 112 m),
+  faceted to hug the facade (2.5 m proud of the arm-tip face, 0.6 m at its corners so the plan valleys / 8-lobe count stay intact),
+  3.2 m titanium edge members + cyan edge lines, 9 diagonal brushed members, gunmetal transoms with amber lines, central spine,
+  14 m walk-through opening with titanium frame; the old stepped portal jambs / gable / fins are replaced by it (glazing + doors + canopy kept, 0–24 m).
+  Group `Hood` is in the collision lists (circulation, web walk).
+* Contrast: plates are gunmetal (M-02, albedo ~0.25), silver M-01 only on frames/edges; darker navy/purple sky; weaker reflection dome, fill light
+  and uplights; bloom lowered; amber interior coves ~1.7× brighter; `hood_glow()` warm hall lights + ring spot.
+* Saucers: thicker discs (6.5 / 8 / 6.5 m), four underside light rings on the cone (amber + one cyan), warm rim glow, more visible glass railings.
