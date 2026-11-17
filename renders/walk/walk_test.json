@@ -2,17 +2,17 @@
  "results": {
   "L1_to_L2": {
    "ok": true,
-   "z": 16.002521514892578
+   "z": 23.998138427734375
   },
   "balustrade_blocks": {
    "ok": true,
-   "y": 40.506206146787406,
-   "z": 26.003154754638672
+   "y": 40.50823208966352,
+   "z": 47.984989166259766
   },
   "stair_L3_L4": {
    "ok": true,
-   "z": 36.00379180908203,
-   "expect": 36.0
+   "z": 64.49581909179688,
+   "expect": 64.5
   },
   "tp_lobby": {
    "ok": true,
@@ -24,19 +24,24 @@
    "z": 0.01,
    "floor": "L1"
   },
+  "tp_L11": {
+   "ok": true,
+   "z": 179.99,
+   "floor": "L11"
+  },
   "tp_L12": {
    "ok": true,
-   "z": 128.0,
+   "z": 194.0,
    "floor": "L12"
   },
   "tp_L21": {
    "ok": true,
-   "z": 235.99,
+   "z": 320.01,
    "floor": "L21"
   },
   "tp_L28": {
    "ok": true,
-   "z": 320.01,
+   "z": 360.0,
    "floor": "L28"
   },
   "tp_L30": {
@@ -47,16 +52,17 @@
   "console_errors": []
  },
  "log": [
-  "loaded in 1.0 s; bvh True collision tris 230216",
-  "L1 route ok True final 30.16 31.61 z 16.0 L2",
-  "NEG balustrade: stopped at y 40.51 z 26.0 -> True",
-  "stair route ok True z 36.0 expect 36.0 L4",
-  "teleport lobby 0 -150 0.01 L1 grounded True",
-  "teleport atrium 12 -30 0.01 L1 grounded True",
-  "teleport L12 0 -43.5 128.0 L12 grounded True",
-  "teleport L21 0 -43.5 235.99 L21 grounded True",
-  "teleport L28 0 -60 320.01 L28 grounded True",
-  "teleport L30 0 -25 400 L30 grounded True",
+  "loaded in 1.8 s; bvh True collision tris 156104",
+  "L1 route ok True final 28.23 32.54 z 24.0 L2",
+  "NEG balustrade: stopped at y 40.51 z 47.98 -> True",
+  "stair route ok True z 64.5 expect 64.5 L4",
+  "teleport lobby 0 -149 0.01 L1 grounded True",
+  "teleport atrium 14 -30 0.01 L1 grounded True",
+  "teleport L11 0 -4.6 179.99 L11 grounded True",
+  "teleport L12 0 -3.6 194.0 L12 grounded True",
+  "teleport L21 0 5.6 320.01 L21 grounded True",
+  "teleport L28 0 8.6 360.0 L28 grounded True",
+  "teleport L30 0 11.5 400 L30 grounded True",
   "console errors: []"
  ]
 }

@@ -114,13 +114,14 @@ def city(sc):
 
 def run(views, tag, samples, scale):
     for v in views:
-        bpy.ops.wm.open_mainfile(filepath=os.path.join(OUT, 'model.blend'))
+        bpy.ops.wm.open_mainfile(filepath=os.environ.get('SKY_BLEND', os.path.join(OUT, 'model.blend')))
         t0 = time.time()
         if v.endswith('_mask'):
             b = v[:-5]; loc, rot, osc, res = ORTHO[b]
             sc = setup(samples=1, res=res); sc.cycles.use_denoising = False
             sc.view_settings.view_transform = 'Standard'
             world(sc, strength=0.0); mask_override()
+            if b == 'section': clip_y(0.0)
             camera(loc, rot=rot, ortho=osc)
             render_to(os.path.join(OUT, 'renders/ortho/%s_%s.png' % (v, tag)))
         elif v in ORTHO:
@@ -147,23 +148,23 @@ def run(views, tag, samples, scale):
         elif v == 'atrium':
             sc = setup(samples=samples, res=(int(1920 * scale), int(1080 * scale)))
             world(sc, strength=0.5)
-            for z in (12, 40, 90, 160): light('POINT', (0, 0, z), 3e4, (1.0, 0.75, 0.45), size=3)
-            light('POINT', (0, 0, 34), 1.5e4, (1.0, 0.6, 0.2), size=6)
+            for z in (90, 140): light('POINT', (0, 0, z), 3e4, (1.0, 0.75, 0.45), size=3)
+            for x in (-22, 22): light('POINT', (x, -14, 30), 2.5e4, (1.0, 0.6, 0.2), size=4)
             light('POINT', (0, -30, 8), 6e4, (0.4, 0.8, 1.0), size=2)
-            camera((6, -42, 1.7), target=(0, 0, 60), lens=14)
+            camera((14, -46, 1.7), target=(0, 0, 22), lens=16)
             render_to(os.path.join(OUT, 'renders/atrium_interior_%s.png' % tag))
         elif v == 'gallery':
             sc = setup(samples=samples, res=(int(1920 * scale), int(1080 * scale)))
             world(sc, strength=0.5)
-            z = 128.0
+            z = 130.5
             for r in (60, 80, 100): light('POINT', (r, 0, z + 8), 2e4, (1.0, 0.8, 0.55), size=2)
             camera((49, -3, z + 1.7), target=(110, 4, z + 3.5), lens=16)
-            render_to(os.path.join(OUT, 'renders/gallery_L12_%s.png' % tag))
+            render_to(os.path.join(OUT, 'renders/gallery_L8_%s.png' % tag))
         elif v == 'obs':
             sc = setup(samples=samples, res=(int(1920 * scale), int(1080 * scale)))
             world(sc, strength=1.0); city(sc)
-            light('POINT', (0, -40, 330), 1e5, (1.0, 0.75, 0.5), size=3)
-            camera((-30, -60, 321.7), target=(40, -120, 315), lens=16)
+            light('POINT', (0, -2, 370), 4e4, (1.0, 0.75, 0.5), size=3)
+            camera((-4, -2, 361.7), target=(30, -60, 352), lens=16)
             render_to(os.path.join(OUT, 'renders/obs_L28_%s.png' % tag))
         elif v == 'cutaway':
             sc = setup(samples=samples, res=(int(1920 * scale), int(1080 * scale)))

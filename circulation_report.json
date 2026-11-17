@@ -1,12 +1,12 @@
 {
- "spaces": 583,
- "reachable": 583,
- "reachable_walking": 583,
+ "spaces": 269,
+ "reachable": 269,
+ "reachable_walking": 269,
  "unreachable": [],
  "unreachable_walking": [],
  "n_unreachable_walking": 0,
- "links": 669,
- "links_ok": 669,
+ "links": 325,
+ "links_ok": 325,
  "failed_links": [],
  "spaces_without_floor": [],
  "by_floor": {
@@ -55,72 +55,72 @@
    21
   ],
   "L11": [
-   25,
-   25
+   3,
+   3
   ],
   "L12": [
-   21,
-   21
+   3,
+   3
   ],
   "L13": [
-   21,
-   21
+   3,
+   3
   ],
   "L14": [
-   21,
-   21
+   3,
+   3
   ],
   "L15": [
-   21,
-   21
+   3,
+   3
   ],
   "L16": [
-   21,
-   21
+   3,
+   3
   ],
   "L17": [
-   21,
-   21
+   3,
+   3
   ],
   "L18": [
-   21,
-   21
+   3,
+   3
   ],
   "L19": [
-   21,
-   21
+   3,
+   3
   ],
   "L20": [
-   21,
-   21
+   3,
+   3
   ],
   "L21": [
-   25,
-   25
+   3,
+   3
   ],
   "L22": [
-   21,
-   21
+   3,
+   3
   ],
   "L23": [
-   21,
-   21
+   3,
+   3
   ],
   "L24": [
-   21,
-   21
+   3,
+   3
   ],
   "L25": [
-   21,
-   21
+   3,
+   3
   ],
   "L26": [
-   21,
-   21
+   3,
+   3
   ],
   "L27": [
-   21,
-   21
+   3,
+   3
   ],
   "L28": [
    3,
@@ -139,77 +139,82 @@
   {
    "id": "P0_0",
    "kind": "passenger",
-   "stops": 28
+   "stops": 11
   },
   {
    "id": "P1_0",
    "kind": "passenger",
-   "stops": 28
+   "stops": 11
   },
   {
    "id": "P1_1",
    "kind": "passenger",
-   "stops": 28
+   "stops": 11
   },
   {
    "id": "P2_0",
    "kind": "passenger",
-   "stops": 28
+   "stops": 11
   },
   {
    "id": "P3_0",
    "kind": "passenger",
-   "stops": 28
+   "stops": 11
   },
   {
    "id": "P3_1",
    "kind": "passenger",
-   "stops": 28
+   "stops": 11
   },
   {
    "id": "P4_0",
    "kind": "passenger",
-   "stops": 28
+   "stops": 11
   },
   {
    "id": "P5_0",
    "kind": "passenger",
-   "stops": 28
+   "stops": 11
   },
   {
    "id": "P5_1",
    "kind": "passenger",
-   "stops": 28
+   "stops": 11
   },
   {
    "id": "P6_0",
    "kind": "passenger",
-   "stops": 28
+   "stops": 11
   },
   {
    "id": "P7_0",
    "kind": "passenger",
-   "stops": 28
+   "stops": 11
   },
   {
    "id": "P7_1",
    "kind": "passenger",
-   "stops": 28
+   "stops": 11
+  },
+  {
+   "id": "HA",
+   "kind": "atrium_glass",
+   "stops": 2
   },
   {
    "id": "HS",
    "kind": "high_speed",
-   "stops": 6
+   "stops": 5
   }
  ],
- "flights": 500,
- "flights_ok": 500,
+ "flights": 440,
+ "flights_ok": 440,
  "flight_issues": [],
- "min_headroom_stairs": 4.5,
+ "min_headroom_stairs": 4.2,
  "min_headroom_esc": 99.0,
  "negative_probes": [
   {
-   "name": "L12 arm0 -> outside through glass",
+   "name": "L8 arm0 -> outside through glass",
    "blocked": true
   },
   {
@@ -222,6 +227,10 @@
   },
   {
    "name": "L3 corridor -> atrium void (balustrade)",
+   "blocked": true
+  },
+  {
+   "name": "L20 hall -> outside through glass",
    "blocked": true
   }
  ]

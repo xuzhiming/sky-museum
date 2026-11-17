@@ -1,0 +1,51 @@
+{
+ "passes": 2,
+ "base": {
+  "FAN.r_scale": 1.0,
+  "VALLEY_RATIO.0.1": 0.86,
+  "FAN.half_deg": 20.0,
+  "FAN.z1": 88.0,
+  "LEAN.2.1": 22.0,
+  "PODS.0.z": 292.0,
+  "PODS.0.x": -79.0,
+  "PODS.0.y": 70.0,
+  "PODS.0.R": 36.0,
+  "PODS.1.z": 182.0,
+  "PODS.1.x": -98.0,
+  "PODS.1.y": 35.0,
+  "PODS.1.R": 48.0,
+  "PODS.2.z": 266.0,
+  "PODS.2.x": 92.0,
+  "PODS.2.y": 20.0,
+  "PODS.2.R": 32.0,
+  "SPIRE.x": 12.0,
+  "RO_SCALE": 1.0
+ },
+ "steps": {
+  "LEAN.2.1": 6.0,
+  "PODS.0.z": 8.0,
+  "PODS.0.x": 8.0,
+  "PODS.0.y": 10.0,
+  "PODS.0.R": 6.0,
+  "PODS.1.z": 8.0,
+  "PODS.1.x": 8.0,
+  "PODS.1.y": 10.0,
+  "PODS.1.R": 6.0,
+  "PODS.2.z": 8.0,
+  "PODS.2.x": 8.0,
+  "PODS.2.y": 10.0,
+  "PODS.2.R": 6.0,
+  "SPIRE.x": 4.0,
+  "RO_SCALE": 0.01,
+  "FAN.r_scale": 0.03,
+  "VALLEY_RATIO.0.1": 0.02,
+  "FAN.half_deg": 3.0,
+  "FAN.z1": 8.0
+ },
+ "start": {
+  "VALLEY_RATIO.0.1": 0.98,
+  "FAN.r_scale": 1.12,
+  "FAN.half_deg": 24.0,
+  "FAN.z1": 76.0
+ }
+}

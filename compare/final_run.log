@@ -1,0 +1,32 @@
+built in 6.7
+front done 5.9 s
+back done 6.0 s
+left done 5.6 s
+right done 5.3 s
+top done 9.5 s
+section done 10.9 s
+XX front: base width @z=46                    model   335.67 target 360.0 err -24.33
+XX front: base segment top (setback)          model     0.00 target 48.0 err -48.00
+XX front: obs ring top z (target 320)         model   313.33 target 320.0 err  -6.67
+XX front: obs ring top z (target 360)         model   353.33 target 360.0 err  -6.67
+XX front: obs ring top z (target 400)         model   394.00 target 400.0 err  -6.00
+XX front: width @z=180 (param Ro)             model   246.00 target 198.0 err  48.00
+XX front: width @z=250 (param Ro)             model   173.33 target 146.0 err  27.33
+XX right: base width @z=46                    model   341.67 target 360.0 err -18.33
+XX right: base segment top (setback)          model     0.00 target 48.0 err -48.00
+XX right: obs ring top z (target 320)         model   313.33 target 320.0 err  -6.67
+XX right: obs ring top z (target 360)         model   353.33 target 360.0 err  -6.67
+XX right: obs ring top z (target 400)         model   394.00 target 400.0 err  -6.00
+XX top: arm count (polar runs above mid radius) model     4.00 target 8 err  -4.00
+XX top: footprint max radius (W/2)            model   195.00 target 180.0 err  15.00
+SHEET front    IoU 0.9117  top-edge  16.49 m  width  15.65 m
+SHEET back     IoU 0.9443  top-edge  13.51 m  width   8.79 m
+SHEET left     IoU 0.9109  top-edge  21.46 m  width  14.77 m
+SHEET right    IoU 0.9094  top-edge  20.10 m  width  13.13 m
+SHEET top      IoU 0.9402  top-edge   9.38 m  width  15.95 m
+SHEET section  IoU 0.8393  top-edge  32.17 m  width  30.06 m
+SHEET mean IoU 0.9093
+wrote compare/drawing_vs_model_final.png
+hero done 56.2 s
+atrium done 141.5 s
+ALLDONE

@@ -7,7 +7,7 @@ from mathutils import Vector
 from mathutils.bvhtree import BVHTree
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 COLL = ['Podium', 'Portal', 'Entrance_Glass', 'Shell_Glass', 'Slabs', 'Slabs_Glass', 'Walls', 'Cores', 'Stairs', 'Escalators', 'Rails',
-        'Bridges', 'Obs_Decks', 'Ground', 'Core_Glass', 'Exhibits', 'Spire']
+        'Bridges', 'Obs_Decks', 'Pods', 'Fans', 'Atrium_Roof', 'Ground', 'Core_Glass', 'Exhibits', 'Spire']
 RULES = dict(stair=dict(rmin=0.15, rmax=0.18, tmin=0.28, wmin=1.4, nmax=18, head=2.1), escalator=dict(rmin=0.15, rmax=0.21, tmin=0.30, wmin=1.0, nmax=200, head=2.3))
 
 def bvh():
@@ -99,9 +99,9 @@ def main():
             if v not in seen2: seen2.add(v); q.append(v)
     # negative probes: facade / walls must block
     neg = []
-    for name, a, b, z in [('L12 arm0 -> outside through glass', (0, -120), (0, -160), 128.0), ('L1 lobby -> outside through podium (arm2 side)', (120, 10), (200, 10), 0.0),
-                          ('L5 corridor -> arm hall through ring wall', (math.cos(0.3) * 44, math.sin(0.3) * 44), (math.cos(0.3) * 52, math.sin(0.3) * 52), 46.0),
-                          ('L3 corridor -> atrium void (balustrade)', (0, 43), (0, 36), 26.0)]:
+    for name, a, b, z in [('L8 arm0 -> outside through glass', (0, -100), (0, -130), 130.5), ('L1 lobby -> outside through podium (arm2 side)', (120, 10), (200, 10), 0.0),
+                          ('L5 corridor -> arm hall through ring wall', (math.cos(0.3) * 44, math.sin(0.3) * 44), (math.cos(0.3) * 52, math.sin(0.3) * 52), 81.0),
+                          ('L3 corridor -> atrium void (balustrade)', (0, 43), (0, 36), 48.0), ('L20 hall -> outside through glass', (0, 0), (0, -70), 306.0)]:
         neg.append(dict(name=name, blocked=not clear(a, b, z)))
     rep = dict(spaces=len(S['spaces']), reachable=len(seen), reachable_walking=len(seen2), unreachable=unreachable,
                unreachable_walking=sorted(set(S['spaces']) - seen2)[:60], n_unreachable_walking=len(set(S['spaces']) - seen2),

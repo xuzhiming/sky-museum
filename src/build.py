@@ -10,7 +10,7 @@ OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 def make_acc():
     acc = Acc()
     exterior.build_exterior(acc)
-    spec = interior.build_interior(acc)
+    spec = {} if os.environ.get('SKY_EXT_ONLY') else interior.build_interior(acc)
     return acc, spec
 
 def to_blender(acc):
@@ -49,6 +49,8 @@ if __name__ == '__main__':
     acc, spec = make_acc()
     print('tris', acc.stats(), acc.tri_by_group())
     to_blender(acc)
+    if os.environ.get('SKY_BLEND'):
+        bpy.ops.wm.save_as_mainfile(filepath=os.environ['SKY_BLEND']); sys.exit(0)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, 'model.blend'))
     json.dump(dict(tris=acc.stats(), by_group=acc.tri_by_group()), open(os.path.join(OUT, 'tri_stats.json'), 'w'), indent=1)
     json.dump(spec, open(os.path.join(OUT, 'circulation_spec.json'), 'w'))

@@ -69,12 +69,12 @@ def wall_open(acc, group, mat, p0, p1, z0, z1, openings, t=0.3):
         cur = max(cur, s1)
     if cur < L - 1e-3: wall(acc, group, mat, P(cur), P(L), z0, z1, t)
 
-def arc_pts(r, a0, a1, seg_len=3.0):
+def arc_pts(r, a0, a1, seg_len=3.0, c=(0.0, 0.0)):
     n = max(1, int(math.ceil(abs(a1 - a0) * r / seg_len)))
-    return [(r * math.cos(a0 + (a1 - a0) * i / n), r * math.sin(a0 + (a1 - a0) * i / n)) for i in range(n + 1)]
+    return [(c[0] + r * math.cos(a0 + (a1 - a0) * i / n), c[1] + r * math.sin(a0 + (a1 - a0) * i / n)) for i in range(n + 1)]
 
-def arc_wall(acc, group, mat, r, a0, a1, z0, z1, t=0.3, seg_len=3.0):
-    pts = arc_pts(r, a0, a1, seg_len)
+def arc_wall(acc, group, mat, r, a0, a1, z0, z1, t=0.3, seg_len=3.0, c=(0.0, 0.0)):
+    pts = arc_pts(r, a0, a1, seg_len, c)
     for a, b in zip(pts, pts[1:]): wall(acc, group, mat, a, b, z0, z1, t)
 
 def arc_band(acc, group, mat, r0, r1, a0, a1, z, seg_len=2.0, down=False):

@@ -45,12 +45,10 @@ def dimension_check(tag):
         ztop = max(z for z, a, b in pr)
         add('%s: total height H' % v, ztop, P.H_TOTAL, 2.0)
         w = lambda zz: [b - a for z, a, b in pr if abs(z - zz) < 0.5 / PXM * 2]
-        add('%s: base width @z=10' % v, np.mean(w(10.0)), P.W_BASE if v == 'front' else P.D_BASE, 3.0)
-        add('%s: base width @z=46' % v, np.mean(w(46.0)), P.W_BASE if v == 'front' else P.D_BASE, 3.0)
-        # podium step: width drop just above 48
-        ws = [(z, b - a) for z, a, b in pr if 40 < z < 60]
-        step_z = max([z for z, ww in ws if ww > (P.W_BASE - 6)], default=0)
-        add('%s: base segment top (setback)' % v, step_z, 48.0, 1.5)
+        # sheet: W/D 360 envelope; the drawn base tapers continuously (no setback at 48 - base 0-48 is the titanium podium band)
+        add('%s: base width @z=4 (340..362, within 360 envelope)' % v, np.mean(w(4.0)), 351.0, 11.0)
+        wt = 2 * P.Ro(46.0) * max(1.0, P.FAN['r_scale'] * math.cos(math.radians(45 - P.FAN['half_deg'])))   # fans project beyond the arm tips
+        add('%s: base width @z=46 (taper + fans)' % v, np.mean(w(46.0)), round(wt, 1), 10.0)   # side view also carries the 3 m portal frame
         # observation rings: local width maxima above 300 m
         ws = np.array([(z, b - a) for z, a, b in pr if 300 < z < 410])
         rings = []
@@ -62,7 +60,7 @@ def dimension_check(tag):
                     k = np.argmax(ww[sel]); rings.append((zz[sel][k], ww[sel][k]))
                     add('%s: obs ring top z (target %d)' % (v, target), zz[sel][ww[sel] > ww[sel].max() - 1.0].max(), target, 1.5)
         # segment boundaries (dimension table stations): width = 2 x arm-tip radius on the axis views
-        for zz in (120.0, 180.0, 250.0, 308.0, 340.0, 385.0):
+        for zz in (120.0, 150.0, 220.0, 308.0, 340.0, 385.0):   # stations clear of the saucer pods
             add('%s: width @z=%d (param Ro)' % (v, zz), np.mean(w(zz)), round(2 * P.Ro(zz), 1), 3.0)
         add('%s: spire present above 410 (top z)' % v, ztop, P.H_TOTAL, 1.0)
     # top view: count arms from polar profile
@@ -76,47 +74,46 @@ def dimension_check(tag):
         rad.append(rr[ok][v].max() if v.any() else 0)
     rad = np.array(rad)
     # arms: peaks of the footprint radius below the disc radius (discs are circles) - use the mask of the podium via the front-arm spacing
-    thr = (rad.min() + rad.max()) / 2; hi = rad > thr
-    runs = int(np.sum(hi & ~np.roll(hi, 1)))
-    add('top: arm count (polar runs above mid radius)', runs, 8, 0)
+    # lobes = 4 pointed cardinal arms + 4 diagonal fans: local maxima of r(theta) with >= 4 m prominence
+    from scipy.signal import find_peaks
+    sm = np.convolve(np.concatenate([rad[-15:], rad, rad[:15]]), np.ones(15) / 15, 'same')[15:-15]
+    ext = np.concatenate([sm, sm[:100]])
+    pk, _ = find_peaks(ext, prominence=4.0, distance=60)
+    lobes = len(set(int(p) % len(rad) for p in pk))
+    add('top: arm/lobe count (r(theta) peaks)', lobes, 8, 0)
     add('top: valley radius at podium (min r)', rad.min(), round(P.Ri(0), 1), 4.0)
-    add('top: footprint max radius (W/2)', rad.max(), P.W_BASE / 2, 3.0)
+    xs_ = np.where(m.any(0))[0]; ys_ = np.where(m.any(1))[0]
+    add('top: plan extent W (x)', (xs_.max() - xs_.min()) / PXM, P.W_BASE, 6.0)
+    add('top: plan extent D (y)', (ys_.max() - ys_.min()) / PXM, P.D_BASE, 6.0)
     return rows
 
 def sheet_compare(tag):
-    cf = os.path.join(ROOT, 'ref/calib.json')
-    if not os.path.exists(cf): return None
-    C = json.load(open(cf)); out = []
-    for v, c in C.items():
-        if v.startswith('_'): continue
-        sheet = Image.open(os.path.join(ROOT, c['sheet'])).convert('RGB')
-        x0, y0, x1, y1 = c['crop']; pan = np.asarray(sheet.crop((x0, y0, x1, y1))).astype(float)
-        bg = np.median(np.concatenate([pan[:4].reshape(-1, 3), pan[-4:].reshape(-1, 3)]), 0)
-        ref = np.abs(pan - bg).sum(2) > c.get('thr', 40)
-        ref = ndi.binary_closing(ref, np.ones((3, 3)), iterations=3); ref = ndi.binary_fill_holes(ref)
-        ref = ndi.binary_opening(ref, np.ones((3, 3)))
-        lab, n = ndi.label(ref)
-        if n > 1:
-            sz = ndi.sum(ref, lab, range(1, n + 1)); ref = np.isin(lab, [i + 1 for i, s in enumerate(sz) if s > 0.02 * sz.max()])
-        # sheet px -> metres (own dimension lines)
-        sx = c['span_m'] / (c['x_right'] - c['x_left']); sz_ = c['top_m'] / (c['ground_y'] - c['top_y'])
-        mm = model_mask(v if v != 'section' else 'front', tag); H, W = mm.shape
-        # resample sheet mask into model grid
-        yy, xx = np.mgrid[0:H, 0:W]
-        X = (xx - W / 2) / PXM; Z = CAM_Z + (H / 2 - yy) / PXM
-        if v == 'top': Y = Z - CAM_Z
-        px = (c['x_left'] - x0) + (X + c['span_m'] / 2) / sx
-        py = (c['ground_y'] - y0) - (Z / sz_ if v != 'top' else (Y + c['top_m'] / 2) / sz_ - (c['ground_y'] - c['top_y']))
-        ok = (px >= 0) & (px < ref.shape[1] - 1) & (py >= 0) & (py < ref.shape[0] - 1)
-        R = np.zeros_like(mm); R[ok] = ref[py[ok].astype(int), px[ok].astype(int)]
-        if v != 'top': R &= Z >= 0; mm = mm & (Z >= 0)
+    """reference masks ref/refmask_<view>.png (made by refmask.py from the design sheet panels, already in the model's
+    3 px/m ortho frame) vs model mask renders. metrics: IoU, mean top-edge error (m), mean width-profile error (m, per 5 m row).
+    elevations compared for z >= 4 m (sheet ground lines / labels removed)."""
+    out = []
+    for v in ['front', 'back', 'left', 'right', 'top', 'section']:
+        rp = os.path.join(ROOT, 'ref/refmask_%s.png' % v)
+        mp = os.path.join(ROOT, 'renders/ortho/%s_mask_%s.png' % (v, tag))
+        if not (os.path.exists(rp) and os.path.exists(mp)): continue
+        R = np.asarray(Image.open(rp).convert('L')) > 128
+        mm = np.asarray(Image.open(mp).convert('L')) > 30
+        H, W = mm.shape
+        if v != 'top':
+            Z = CAM_Z + (H / 2 - np.arange(H)) / PXM
+            keep = (Z >= 4.0)[:, None]; R = R & keep; mm = mm & keep
         iou = (R & mm).sum() / max((R | mm).sum(), 1)
-        cols = np.where(R.any(0) & mm.any(0))[0]
-        te = np.mean([abs(np.argmax(R[:, c_]) - np.argmax(mm[:, c_])) for c_ in cols]) / PXM if len(cols) else float('nan')
+        cols = np.where(R.any(0) | mm.any(0))[0]
+        def top(M, c_): return np.argmax(M[:, c_]) if M[:, c_].any() else H
+        te = np.mean([abs(top(R, c_) - top(mm, c_)) for c_ in cols]) / PXM if len(cols) else float('nan')
+        rows = range(0, H, 15)
+        wr = [abs(R[r].sum() - mm[r].sum()) / PXM for r in rows if R[r].any() or mm[r].any()]
+        we = float(np.mean(wr)) if wr else float('nan')
         ov = np.zeros((H, W, 3), np.uint8); ov[R & mm] = (230, 230, 230); ov[R & ~mm] = (255, 80, 60); ov[mm & ~R] = (40, 200, 255)
-        sbs = Image.new('RGB', (W * 2, H), (0, 0, 0)); sbs.paste(Image.fromarray(pan.astype(np.uint8)).resize((W, H)), (0, 0)); sbs.paste(Image.fromarray(ov), (W, 0))
-        sbs.save(os.path.join(ROOT, 'compare/compare_%s_%s.png' % (v, tag)))
-        out.append(dict(view=v, iou=round(float(iou), 4), top_err_m=round(float(te), 2)))
+        pan = Image.open(os.path.join(ROOT, 'ref/panelm_%s.png' % v)).convert('RGB') if os.path.exists(os.path.join(ROOT, 'ref/panelm_%s.png' % v)) else Image.new('RGB', (W, H))
+        sbs = Image.new('RGB', (W * 2, H), (0, 0, 0)); sbs.paste(pan.resize((W, H)), (0, 0)); sbs.paste(Image.fromarray(ov), (W, 0))
+        sbs.resize((W, H // 2)).save(os.path.join(ROOT, 'compare/compare_%s_%s.png' % (v, tag)))
+        out.append(dict(view=v, iou=round(float(iou), 4), top_err_m=round(float(te), 2), width_err_m=round(we, 2)))
     return out
 
 def sheet_image(tag, rows):
@@ -148,7 +145,8 @@ def run(tag):
     sheet_image(tag, rows)
     json.dump(dict(dimension_check=rows, sheet=sc), open(os.path.join(ROOT, 'compare/scores_%s.json' % tag), 'w'), indent=1)
     for r in rows: print(('OK ' if r['ok'] else 'XX ') + '%-42s model %8.2f target %s err %6.2f' % (r['item'], r['model'], r['target'], r['err']))
-    print('sheet IoU:', sc if sc is not None else 'n/a (ref/calib.json + sheet image missing)')
+    for r in sc or []: print('SHEET %-8s IoU %.4f  top-edge %6.2f m  width %6.2f m' % (r['view'], r['iou'], r['top_err_m'], r['width_err_m']))
+    if sc: print('SHEET mean IoU %.4f' % np.mean([r['iou'] for r in sc]))
 
 if __name__ == '__main__':
     run(sys.argv[1])

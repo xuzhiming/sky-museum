@@ -1,0 +1,7 @@
+start 0.9141
+pass 0 PODS.0.x -71.0 0.9143
+pass 0 PODS.2.x 84.0 0.9146
+pass 0 PODS.2.R 38.0 0.9149
+pass 0 VALLEY_RATIO.0.1 0.96 0.9152
+pass 0 VALLEY_RATIO.0.1 0.94 0.9153
+BEST 0.9153 {"VALLEY_RATIO.0.1": 0.94, "FAN.r_scale": 1.12, "FAN.half_deg": 24.0, "FAN.z1": 76.0, "PODS.0.x": -71.0, "PODS.2.x": 84.0, "PODS.2.R": 38.0}

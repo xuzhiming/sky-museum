@@ -5,6 +5,8 @@ from playwright.sync_api import sync_playwright
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..') + '/'
 SH = ROOT + 'renders/walk/'; os.makedirs(SH, exist_ok=True)
 S = json.load(open(ROOT + 'circulation_spec.json'))
+sys.path.insert(0, ROOT + 'src'); import params as P
+YT = -P.Ro(0)
 log, errors = [], []
 def L(*a):
     s = ' '.join(str(x) for x in a); print(s, flush=True); log.append(s)
@@ -47,14 +49,14 @@ with sync_playwright() as p:
     # ---- 1. L1: plaza -> entrance door -> lobby -> atrium -> escalator -> L2
     pg.evaluate('window.__walk.teleport("plaza")'); time.sleep(0.8)
     pg.screenshot(path=SH + '01_plaza.png')
-    ok, s = route('L1', [(0, -186, 0.8, True), (0, -170, 0.6), (0, -120, 0.8, True), (0, -50, 0.8, True), (0, -25, 0.8), (25, -12, 0.7), (32, -5.4, 0.4), (32, 23.4, 0.4), (32, 27.5, 0.6), (30, 32, 0.6)], shots=(1, 2, 4, 6, 7))
+    ok, s = route('L1', [(0, YT - 6, 0.8, True), (0, YT + P.ENTRANCE_RECESS + 4, 0.6), (0, -120, 0.8, True), (0, -50, 0.8, True), (0, -25, 0.8), (25, -12, 0.7), (30, -16.6, 0.4), (30, 24.9, 0.4), (30, 29.0, 0.6), (28, 33, 0.6)], shots=(1, 2, 4, 6, 7))
     L('L1 route ok', ok, 'final', round(s['x'], 2), round(s['y'], 2), 'z', round(s['z'], 2), s['floor'])
-    res['L1_to_L2'] = dict(ok=ok and abs(s['z'] - 16.0) < 0.3, z=s['z'])
+    res['L1_to_L2'] = dict(ok=ok and abs(s['z'] - 24.0) < 0.3, z=s['z'])
     pg.evaluate('window.__walk.setLook(2.4, -0.25)'); time.sleep(0.5); pg.screenshot(path=SH + '02_L2_atrium_view.png')
     # ---- 2. negative: L3 corridor -> walk into the atrium balustrade
-    pg.evaluate('window.__walk.setPos(0, 44, 26)'); time.sleep(0.6)
+    pg.evaluate('window.__walk.setPos(0, 44, 48)'); time.sleep(0.6)
     ok, s = steer((0, 30), 0.5, timeout=8)
-    res['balustrade_blocks'] = dict(ok=(not ok) and s['y'] > 39.5 and abs(s['z'] - 26) < 0.3, y=s['y'], z=s['z'])
+    res['balustrade_blocks'] = dict(ok=(not ok) and s['y'] > 39.5 and abs(s['z'] - 48) < 0.3, y=s['y'], z=s['z'])
     L('NEG balustrade: stopped at y', round(s['y'], 2), 'z', round(s['z'], 2), '->', res['balustrade_blocks']['ok'])
     pg.screenshot(path=SH + '03_L3_balustrade_block.png')
     # ---- 3. stair climb L3 -> L4 in valley core S0
@@ -72,7 +74,7 @@ with sync_playwright() as p:
     L('stair route ok', ok, 'z', round(s['z'], 2), 'expect', round(res['stair_L3_L4']['expect'], 2), s['floor'])
     pg.screenshot(path=SH + '04_L4_after_stairs.png')
     # ---- 4. teleports
-    for i, n in enumerate(['lobby', 'atrium', 'L12', 'L21', 'L28', 'L30']):
+    for i, n in enumerate(['lobby', 'atrium', 'L11', 'L12', 'L21', 'L28', 'L30']):
         pg.evaluate('window.__walk.teleport("%s")' % n); t1 = time.time()
         while time.time() - t1 < 8 and not st()['grounded']: time.sleep(0.2)
         time.sleep(0.5); s = st()

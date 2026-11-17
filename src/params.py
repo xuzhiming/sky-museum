@@ -11,41 +11,53 @@ D_BASE = 360.0            # base depth (N-S)
 ENTRANCE_H = 48.0         # main entrance portal height
 ENTRANCE_W = 30.0         # portal clear width (sheet: arm-tip portal, ~0.6 x height)
 ATRIUM_R = 40.0           # core atrium dia 80
-CORE_R = 9.0              # central glass elevator core inside the atrium (4 high-speed lifts)
+CORE_R = 7.0              # central glass core L11-L30 (high-speed lifts), above the atrium
 ART_RING_R = 18.0         # golden ring installation dia ~36
-ART_RING_Z = 34.0         # hangs in the L3-L5 atrium-gallery band
+ART_RING_Z = 21.0         # interior sheet: vertical thick ring (Ø≈36) standing on the atrium floor
 N_ARMS = 8                # radial 8-arm star plan
 
-# vertical segments (sheet: base 0-48, lower 48-180, mid 180-320, upper taper 320-400, spire 400-420)
+# vertical segments (exterior sheet floor table: base 0-48, lower 48-180, mid 180-320, upper 320-400, crown/spire 400-420)
 SEGMENTS = [('base', 0, 48), ('lower', 48, 180), ('mid', 180, 320), ('upper', 320, 400), ('spire', 400, 420)]
-# arm-tip radius profile Ro(z) (half of the elevation width at that height) - piecewise linear stations
-RO_PROFILE = [(0, 180.0), (48, 180.0), (48.01, 168.0), (180, 136.0), (320, 96.0), (400, 44.0)]
-SPIRE = dict(z0=400.0, z1=H_TOTAL, r0=10.0, mast_r=1.2)
-VALLEY_RATIO = [(0, 0.60), (180, 0.64), (320, 0.76), (400, 0.80)]   # valley radius / tip radius
-VALLEY_MIN = 74.0         # valleys must clear the atrium + core ring up to L27
+# arm-tip radius profile Ro(z): fitted to the four elevation panels of the exterior sheet (refmask.py + compare loop)
+RO_PROFILE = [(0, 174.0), (20, 172.0), (40, 163.0), (60, 155.0), (80, 143.0), (100, 127.0), (120, 119.0), (140, 112.0),
+              (160, 106.0), (180, 99.0), (200, 90.0), (220, 83.0), (240, 76.0), (260, 70.0), (280, 64.0), (300, 57.0),
+              (320, 49.0), (340, 43.0), (360, 35.0), (380, 29.0), (400, 23.0)]
+VALLEY_RATIO = [[0, 0.94], [80, 0.84], [180, 0.80], [320, 0.80], [400, 0.80]]   # valley radius / tip radius (top view ~ round)
+VALLEY_MIN = 0.0
 TIP_HALF_W_RATIO = 0.11   # flat arm-tip half width / Ro
+# side elevations: the upper tower leans to the rear (+Y): plan centre offset yc(z)
+LEAN = [[0, 0.0], [100, 0.0], [400, 22.0], [420, 23.0]]
+def yc(z): return _interp(LEAN, z)
 
-# observation ring cantilever discs
-OBS = [dict(name='L28', z=320.0, cant=16.0, t=3.0), dict(name='L29', z=360.0, cant=14.0, t=2.6), dict(name='L30', z=400.0, cant=12.0, t=2.4)]
+# diagonal fan wings at the base (top view: fan-shaped quadrant wings between the 4 pointed cardinal arms)
+FAN = dict(z1=76.0, half_deg=24.0, r_in_ratio=0.80, top_drop=0.0, r_scale=1.10)   # r_scale capped so the fans stay inside the 360 m elevation width
 
-# floor program (interior sheet): name, floor-to-floor height, program
-FLOOR_H = [('L1', 16.0, 'lobby'), ('L2', 10.0, 'services')] + \
-          [('L%d' % i, 10.0, 'atrium_gallery') for i in (3, 4, 5)] + \
-          [('L%d' % i, 12.0, 'themed_hall') for i in range(6, 11)] + \
-          [('L%d' % i, 12.0, 'core_gallery') for i in range(11, 21)] + \
-          [('L%d' % i, 12.0, 'sky_gallery') for i in range(21, 28)]
-OBS_FLOORS = [('L28', 320.0, 'cloud_observation'), ('L29', 360.0, 'cloud_observation'), ('L30', 400.0, 'cloud_observation')]
+# saucer pods (exterior sheet: 3 cantilevered disc platforms; drawn positions, see compare_log for the label conflict)
+PODS = [dict(name='P1', z=292.0, x=-71.0, y=70.0, R=36.0, t=4.0),
+        dict(name='P2', z=182.0, x=-98.0, y=35.0, R=48.0, t=5.0),
+        dict(name='P3', z=266.0, x=84.0, y=20.0, R=38.0, t=4.0)]
+# observation ring decks at the labelled +320 / +360 / +400 levels (L21 / L28 / L30), slim cantilevers around the tower
+OBS = [dict(name='L21', z=320.0, cant=8.0, t=2.0), dict(name='L28', z=360.0, cant=7.0, t=2.0), dict(name='L30', z=400.0, cant=6.0, t=1.6)]
+# twin needle spires (front elevation: two blades at x = +-16 reaching 420)
+SPIRE = dict(z0=410.0, z1=H_TOTAL, x=12.0, w0=3.0, d0=10.0)
+
+# floor program. exterior sheet table: L1 0-24, L2 24-48, L3-L10 48-180, L11-L20 180-320, L21-L27 320-360,
+# L28-L29 360-400, L30 400-420 (interior sheet labels +60/+120/... conflict; logged in compare_log.md)
+FLOOR_H = [('L1', 24.0, 'lobby'), ('L2', 24.0, 'services')] + \
+          [('L%d' % i, 16.5, 'atrium_gallery' if i <= 5 else 'themed_hall') for i in range(3, 11)] + \
+          [('L%d' % i, 14.0, 'core_gallery') for i in range(11, 21)] + \
+          [('L%d' % i, 40.0 / 7, 'sky_gallery') for i in range(21, 28)] + \
+          [('L28', 20.0, 'cloud_observation'), ('L29', 20.0, 'cloud_observation')]
 SLAB_T = 0.6
+ATRIUM_TOP = 180.0        # Ø80 atrium void L1-L10, roofed at L11 (section A-A)
 
 def floors():
     """[(name, z_floor, h, program)] L1..L30"""
     out, z = [], 0.0
     for n, h, p in FLOOR_H:
-        out.append((n, z, h, p)); z += h
-    assert abs(z - 320.0) < 1e-6, z
-    for i, (n, zf, p) in enumerate(OBS_FLOORS):
-        h = (OBS_FLOORS[i + 1][1] if i + 1 < len(OBS_FLOORS) else H_TOTAL) - zf
-        out.append((n, zf, h, p))
+        out.append((n, round(z, 4), h, p)); z += h
+    assert abs(z - 400.0) < 1e-6, z
+    out.append(('L30', 400.0, H_TOTAL - 400.0, 'cloud_observation'))
     return out
 
 # interior layout (per typical floor)
@@ -58,8 +70,8 @@ STAIR = dict(riser=0.1667, tread=0.30, width=1.6, landing=2.0, max_run=18)
 ESC = dict(riser=0.20, tread=0.35, width=1.6)      # escalators L1-L5 (walkable step flights)
 N_HS_LIFTS = 4            # high-speed in central core
 N_PASS_LIFTS = 8          # passenger lifts in valley cores
-HS_STOPS = ['L1', 'L11', 'L21', 'L28', 'L29', 'L30']
-BRIDGE_LEVELS = ['L11', 'L21']
+HS_STOPS = ['L11', 'L21', 'L28', 'L29', 'L30']   # central core (sky lobby L11); atrium lifts L1 <-> L11
+BRIDGE_LEVELS = []
 BRIDGE_W = 4.0
 
 # angles
@@ -72,36 +84,46 @@ def _interp(tab, z):
         if z <= z1: return a + (b - a) * (z - z0) / max(z1 - z0, 1e-9)
     return tab[-1][1]
 
-def Ro(z): return _interp(RO_PROFILE, z)
-def Ri(z):
-    r = Ro(z) * _interp(VALLEY_RATIO, z)
-    return max(r, VALLEY_MIN) if z <= 320 else r
+RO_SCALE = 1.0
+def Ro(z): return _interp(RO_PROFILE, z) * RO_SCALE
+def Ri(z): return Ro(z) * _interp(VALLEY_RATIO, z)
 
 def star(z, inset=0.0):
     """plan polygon at height z: 8 flat-tipped arms. returns [(x,y)] CCW, 24 vertices."""
     ro, ri = Ro(z) - inset, Ri(z) - inset
     hw = TIP_HALF_W_RATIO * Ro(z)
-    pts = []
+    pts = []; c = yc(z)
     for k in range(N_ARMS):
         a = arm_angle(k)
         ca, sa = math.cos(a), math.sin(a)
         # tip corners (perpendicular offset), then valley
         for s in (-1, 1):
-            pts.append((ro * ca - s * hw * sa, ro * sa + s * hw * ca))
+            pts.append((ro * ca - s * hw * sa, ro * sa + s * hw * ca + c))
         v = valley_angle(k)
-        pts.append((ri * math.cos(v), ri * math.sin(v)))
+        pts.append((ri * math.cos(v), ri * math.sin(v) + c))
     return pts
 
-STATIONS = sorted(set([0, 8, 16, 26, 36, 48, 48.01] + [f[1] for f in floors()] + [360, 400]))
+STATIONS = sorted(set([round(z, 3) for z, _ in RO_PROFILE] + [round(f[1], 3) for f in floors()] + [400]))
 
 if __name__ == '__main__':
     for n, z, h, p in floors(): print(n, z, h, p, 'Ro %.1f Ri %.1f' % (Ro(z), Ri(z)))
 
 # --- exterior details
-CROWN_Z = 410.0; CROWN_R = 30.0     # L30 glass crown 400 -> 410, spire 410 -> 420
-SPIRE['z0'] = CROWN_Z
+CROWN_Z = 410.0; CROWN_R = 18.0     # L30 glass crown 400 -> 410
 ENTRANCE_RECESS = 6.0
 DOOR_W, DOOR_H = 12.0, 6.0
-SCREEN_Z = (6.0, 42.0)
+SCREEN_Z = (12.0, 78.0)             # front elevation: media screens ~z 15-85 on the lower faces
+PORTAL_FRAME = dict(leg_x=82.0, eave_z=100.0, eave_x=128.0, peak_z=190.0)   # pentagon frame on the main facade
 VALLEY_STRIPS = True
 PLAZA_R = 250.0
+
+# --- comparison-loop overrides: SKY_OVR='{"FAN.half_deg": 22, "PODS.0.z": 290}' (used by tune.py only)
+import os as _os, json as _json
+for _k, _v in _json.loads(_os.environ.get('SKY_OVR', '{}')).items():
+    _p = _k.split('.'); _o = globals()
+    if len(_p) == 1: _o[_p[0]] = _v; continue
+    _o = _o[_p[0]]
+    for _q in _p[1:-1]: _o = _o[int(_q)] if isinstance(_o, list) else _o[_q]
+    _l = _p[-1]
+    if isinstance(_o, list): _o[int(_l)] = _v
+    else: _o[_l] = _v

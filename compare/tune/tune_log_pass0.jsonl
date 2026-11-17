@@ -1,0 +1,14 @@
+{"ovr": {}, "mean": 0.8872333333333334, "views": {"front": 0.9121, "back": 0.9421, "left": 0.9144, "right": 0.9099, "top": 0.8175, "section": 0.8274}}
+{"ovr": {"RO_SCALE": 1.02}, "mean": 0.8924, "views": {"front": 0.9194, "back": 0.9419, "left": 0.9069, "right": 0.9021, "top": 0.8421, "section": 0.842}}
+{"ovr": {"RO_SCALE": 1.04}, "mean": 0.8949333333333334, "views": {"front": 0.9235, "back": 0.9355, "left": 0.8979, "right": 0.8939, "top": 0.8622, "section": 0.8566}}
+{"ovr": {"RO_SCALE": 1.06}, "mean": 0.8944666666666666, "views": {"front": 0.9238, "back": 0.9242, "left": 0.8877, "right": 0.8846, "top": 0.8759, "section": 0.8706}}
+{"ovr": {"RO_SCALE": 1.02}, "mean": 0.8924, "views": {"front": 0.9194, "back": 0.9419, "left": 0.9069, "right": 0.9021, "top": 0.8421, "section": 0.842}}
+{"ovr": {"RO_SCALE": 1.04, "VALLEY_RATIO.0.1": 0.9}, "mean": 0.8957333333333333, "views": {"front": 0.9235, "back": 0.9355, "left": 0.8979, "right": 0.8939, "top": 0.867, "section": 0.8566}}
+{"ovr": {"RO_SCALE": 1.04, "VALLEY_RATIO.0.1": 0.94}, "mean": 0.8958333333333334, "views": {"front": 0.9235, "back": 0.9355, "left": 0.8979, "right": 0.8939, "top": 0.8676, "section": 0.8566}}
+{"ovr": {"RO_SCALE": 1.04, "VALLEY_RATIO.0.1": 0.98}, "mean": 0.89575, "views": {"front": 0.9235, "back": 0.9355, "left": 0.8979, "right": 0.8939, "top": 0.8671, "section": 0.8566}}
+{"ovr": {"RO_SCALE": 1.04, "VALLEY_RATIO.0.1": 0.9}, "mean": 0.8957333333333333, "views": {"front": 0.9235, "back": 0.9355, "left": 0.8979, "right": 0.8939, "top": 0.867, "section": 0.8566}}
+{"ovr": {"RO_SCALE": 1.04, "VALLEY_RATIO.0.1": 0.94, "VALLEY_RATIO.1.1": 0.88}, "mean": 0.8958333333333334, "views": {"front": 0.9235, "back": 0.9353, "left": 0.8979, "right": 0.894, "top": 0.8676, "section": 0.8567}}
+{"ovr": {"RO_SCALE": 1.04, "VALLEY_RATIO.0.1": 0.94, "VALLEY_RATIO.1.1": 0.8}, "mean": 0.8958499999999999, "views": {"front": 0.9235, "back": 0.9356, "left": 0.898, "right": 0.8939, "top": 0.8676, "section": 0.8565}}
+{"ovr": {"RO_SCALE": 1.04, "VALLEY_RATIO.0.1": 0.94, "TIP_HALF_W_RATIO": 0.14}, "mean": 0.89535, "views": {"front": 0.9235, "back": 0.9355, "left": 0.8979, "right": 0.8939, "top": 0.8648, "section": 0.8565}}
+{"ovr": {"RO_SCALE": 1.04, "VALLEY_RATIO.0.1": 0.94, "TIP_HALF_W_RATIO": 0.08}, "mean": 0.8964500000000001, "views": {"front": 0.9235, "back": 0.9355, "left": 0.898, "right": 0.894, "top": 0.8711, "section": 0.8566}}
+{"ovr": {"RO_SCALE": 1.04, "VALLEY_RATIO.0.1": 0.94, "TIP_HALF_W_RATIO": 0.11}, "mean": 0.8958333333333334, "views": {"front": 0.9235, "back": 0.9355, "left": 0.8979, "right": 0.8939, "top": 0.8676, "section": 0.8566}}

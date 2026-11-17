@@ -1,0 +1,307 @@
+{
+ "_note": "pixel coords on ref/sheet_exterior.png (1536x1024). x_left/x_right = ends of the W/D 360 m dimension line; ground_y = base line; top_y = H 420 top (front: H dimension line; other views: spire tip, same 420 m). crop = panel box used for segmentation; excl = boxes inside the crop to ignore (dimension lines / labels).",
+ "front": {
+  "sheet": "ref/sheet_exterior.png",
+  "crop": [
+   246,
+   8,
+   588,
+   386
+  ],
+  "x_left": 261,
+  "x_right": 580,
+  "span_m": 360,
+  "ground_y": 384,
+  "top_y": 20,
+  "top_m": 420,
+  "thr": 34,
+  "excl": [
+   [
+    246,
+    250,
+    262,
+    386
+   ],
+   [
+    246,
+    8,
+    262,
+    212
+   ]
+  ],
+  "bg": [
+   [
+    268,
+    30,
+    290,
+    60
+   ],
+   [
+    560,
+    30,
+    585,
+    60
+   ],
+   [
+    264,
+    320,
+    272,
+    340
+   ],
+   [
+    577,
+    290,
+    587,
+    320
+   ],
+   [
+    300,
+    90,
+    330,
+    110
+   ],
+   [
+    520,
+    90,
+    560,
+    110
+   ]
+  ]
+ },
+ "back": {
+  "sheet": "ref/sheet_exterior.png",
+  "crop": [
+   620,
+   6,
+   925,
+   389
+  ],
+  "x_left": 628,
+  "x_right": 913,
+  "span_m": 360,
+  "ground_y": 387,
+  "top_y": 15,
+  "top_m": 420,
+  "thr": 28,
+  "excl": [],
+  "bg": [
+   [
+    630,
+    30,
+    660,
+    60
+   ],
+   [
+    880,
+    30,
+    910,
+    60
+   ],
+   [
+    622,
+    300,
+    632,
+    330
+   ],
+   [
+    915,
+    300,
+    924,
+    330
+   ]
+  ]
+ },
+ "left": {
+  "sheet": "ref/sheet_exterior.png",
+  "crop": [
+   932,
+   6,
+   1205,
+   389
+  ],
+  "x_left": 942,
+  "x_right": 1198,
+  "span_m": 360,
+  "ground_y": 387,
+  "top_y": 15,
+  "top_m": 420,
+  "thr": 26,
+  "excl": [],
+  "bg": [
+   [
+    940,
+    30,
+    970,
+    60
+   ],
+   [
+    1170,
+    30,
+    1200,
+    60
+   ],
+   [
+    934,
+    300,
+    944,
+    330
+   ],
+   [
+    1192,
+    300,
+    1202,
+    330
+   ]
+  ]
+ },
+ "right": {
+  "sheet": "ref/sheet_exterior.png",
+  "crop": [
+   1228,
+   6,
+   1512,
+   389
+  ],
+  "x_left": 1237,
+  "x_right": 1503,
+  "span_m": 360,
+  "ground_y": 387,
+  "top_y": 15,
+  "top_m": 420,
+  "thr": 26,
+  "excl": [],
+  "bg": [
+   [
+    1235,
+    30,
+    1265,
+    60
+   ],
+   [
+    1470,
+    30,
+    1505,
+    60
+   ],
+   [
+    1230,
+    300,
+    1240,
+    330
+   ],
+   [
+    1500,
+    300,
+    1510,
+    330
+   ]
+  ]
+ },
+ "top": {
+  "sheet": "ref/sheet_exterior.png",
+  "crop": [
+   40,
+   528,
+   332,
+   824
+  ],
+  "x_left": 42,
+  "x_right": 328,
+  "span_m": 360,
+  "ground_y": 815,
+  "top_y": 535,
+  "top_m": 360,
+  "thr": 45,
+  "excl": [],
+  "bg": [
+   [
+    300,
+    530,
+    322,
+    546
+   ],
+   [
+    48,
+    530,
+    70,
+    546
+   ],
+   [
+    300,
+    806,
+    322,
+    822
+   ],
+   [
+    48,
+    806,
+    70,
+    822
+   ]
+  ],
+  "close": 1
+ },
+ "section": {
+  "sheet": "ref/sheet_exterior.png",
+  "crop": [
+   380,
+   470,
+   800,
+   927
+  ],
+  "x_left": 392,
+  "x_right": 780,
+  "span_m": 360,
+  "ground_y": 925,
+  "top_y": 478,
+  "top_m": 420,
+  "thr": 40,
+  "excl": [
+   [
+    690,
+    470,
+    800,
+    612
+   ],
+   [
+    716,
+    612,
+    800,
+    700
+   ],
+   [
+    380,
+    470,
+    444,
+    690
+   ]
+  ],
+  "bg": [
+   [
+    480,
+    480,
+    540,
+    520
+   ],
+   [
+    630,
+    480,
+    690,
+    520
+   ],
+   [
+    790,
+    860,
+    830,
+    915
+   ],
+   [
+    790,
+    700,
+    830,
+    760
+   ]
+  ],
+  "mirror_below_y": 690
+ }
+}

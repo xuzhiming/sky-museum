@@ -14,3 +14,10 @@ Procedural Blender (bpy 5.3, Python only) model + Three.js viewer, following the
 | `renders/*_final.png` | hero / entrance / atrium / L12 gallery / L28 deck / section cutaway; `renders/ortho/` elevations |
 
 Rebuild everything: `bash src/final.sh && bash src/rebuild_web.sh && python3 src/circulation.py && python3 src/walk_test.py`
+
+## Drawing comparison loop (task 2)
+* `python3 src/refmask.py` – sheet panels → reference masks (`ref/calib.json`, outputs `ref/refmask_*.png`, `ref/panelm_*.png`)
+* `bash src/mloop.sh TAG` – build + mask renders + IoU / top-edge / width-profile per view (`compare/scores_TAG.json`, overlays)
+* `python3 src/tune.py compare/tune/tune3.json` – coordinate-descent tuning of exterior params (log `compare/tune/`)
+* `bash src/final.sh` – final masks, ortho renders, checks, `compare/drawing_vs_model_final.png`, hero render
+* history and sheet conflicts: `compare_log.md`

@@ -9,86 +9,86 @@
   },
   {
    "item": "front: base width @z=10",
-   "model": 361.0,
+   "model": 347.0,
    "target": 360.0,
-   "err": 1.0,
-   "ok": true
+   "err": -13.0,
+   "ok": false
   },
   {
    "item": "front: base width @z=46",
-   "model": 361.0,
+   "model": 323.0,
    "target": 360.0,
-   "err": 1.0,
-   "ok": true
+   "err": -37.0,
+   "ok": false
   },
   {
    "item": "front: base segment top (setback)",
-   "model": 48.0,
+   "model": 0.0,
    "target": 48.0,
-   "err": 0.0,
-   "ok": true
+   "err": -48.0,
+   "ok": false
   },
   {
    "item": "front: obs ring top z (target 320)",
-   "model": 321.33,
+   "model": 313.33,
    "target": 320.0,
-   "err": 1.33,
-   "ok": true
+   "err": -6.67,
+   "ok": false
   },
   {
    "item": "front: obs ring top z (target 360)",
-   "model": 361.33,
+   "model": 353.33,
    "target": 360.0,
-   "err": 1.33,
-   "ok": true
+   "err": -6.67,
+   "ok": false
   },
   {
    "item": "front: obs ring top z (target 400)",
-   "model": 401.33,
+   "model": 394.0,
    "target": 400.0,
-   "err": 1.33,
-   "ok": true
+   "err": -6.0,
+   "ok": false
   },
   {
    "item": "front: width @z=120 (param Ro)",
-   "model": 303.0,
-   "target": 301.1,
-   "err": 1.9,
+   "model": 240.11,
+   "target": 238.0,
+   "err": 2.11,
    "ok": true
   },
   {
    "item": "front: width @z=180 (param Ro)",
-   "model": 273.67,
-   "target": 272.0,
-   "err": 1.67,
-   "ok": true
+   "model": 246.0,
+   "target": 198.0,
+   "err": 48.0,
+   "ok": false
   },
   {
    "item": "front: width @z=250 (param Ro)",
-   "model": 234.33,
-   "target": 232.0,
-   "err": 2.33,
-   "ok": true
+   "model": 179.0,
+   "target": 146.0,
+   "err": 33.0,
+   "ok": false
   },
   {
    "item": "front: width @z=308 (param Ro)",
-   "model": 201.0,
-   "target": 198.9,
-   "err": 2.1,
+   "model": 109.89,
+   "target": 107.6,
+   "err": 2.29,
    "ok": true
   },
   {
    "item": "front: width @z=340 (param Ro)",
-   "model": 168.33,
-   "target": 166.0,
-   "err": 2.33,
+   "model": 88.11,
+   "target": 86.0,
+   "err": 2.11,
    "ok": true
   },
   {
    "item": "front: width @z=385 (param Ro)",
-   "model": 109.67,
-   "target": 107.5,
-   "err": 2.17,
+   "model": 57.0,
+   "target": 55.0,
+   "err": 2.0,
    "ok": true
   },
   {
@@ -107,86 +107,86 @@
   },
   {
    "item": "right: base width @z=10",
-   "model": 361.0,
+   "model": 347.33,
    "target": 360.0,
-   "err": 1.0,
-   "ok": true
+   "err": -12.67,
+   "ok": false
   },
   {
    "item": "right: base width @z=46",
-   "model": 361.0,
+   "model": 335.33,
    "target": 360.0,
-   "err": 1.0,
-   "ok": true
+   "err": -24.67,
+   "ok": false
   },
   {
    "item": "right: base segment top (setback)",
-   "model": 48.0,
+   "model": 0.0,
    "target": 48.0,
-   "err": 0.0,
-   "ok": true
+   "err": -48.0,
+   "ok": false
   },
   {
    "item": "right: obs ring top z (target 320)",
-   "model": 321.33,
+   "model": 313.33,
    "target": 320.0,
-   "err": 1.33,
-   "ok": true
+   "err": -6.67,
+   "ok": false
   },
   {
    "item": "right: obs ring top z (target 360)",
-   "model": 361.33,
+   "model": 353.33,
    "target": 360.0,
-   "err": 1.33,
-   "ok": true
+   "err": -6.67,
+   "ok": false
   },
   {
    "item": "right: obs ring top z (target 400)",
-   "model": 401.33,
+   "model": 394.0,
    "target": 400.0,
-   "err": 1.33,
-   "ok": true
+   "err": -6.0,
+   "ok": false
   },
   {
    "item": "right: width @z=120 (param Ro)",
-   "model": 303.0,
-   "target": 301.1,
-   "err": 1.9,
+   "model": 240.11,
+   "target": 238.0,
+   "err": 2.11,
    "ok": true
   },
   {
    "item": "right: width @z=180 (param Ro)",
-   "model": 273.67,
-   "target": 272.0,
-   "err": 1.67,
+   "model": 200.0,
+   "target": 198.0,
+   "err": 2.0,
    "ok": true
   },
   {
    "item": "right: width @z=250 (param Ro)",
-   "model": 234.33,
-   "target": 232.0,
+   "model": 148.33,
+   "target": 146.0,
    "err": 2.33,
    "ok": true
   },
   {
    "item": "right: width @z=308 (param Ro)",
-   "model": 201.0,
-   "target": 198.9,
-   "err": 2.1,
+   "model": 109.67,
+   "target": 107.6,
+   "err": 2.07,
    "ok": true
   },
   {
    "item": "right: width @z=340 (param Ro)",
-   "model": 168.33,
-   "target": 166.0,
-   "err": 2.33,
+   "model": 88.0,
+   "target": 86.0,
+   "err": 2.0,
    "ok": true
   },
   {
    "item": "right: width @z=385 (param Ro)",
-   "model": 109.67,
-   "target": 107.5,
-   "err": 2.17,
+   "model": 57.0,
+   "target": 55.0,
+   "err": 2.0,
    "ok": true
   },
   {
@@ -205,18 +205,55 @@
   },
   {
    "item": "top: valley radius at podium (min r)",
-   "model": 111.5,
-   "target": 108.0,
-   "err": 3.5,
+   "model": 150.0,
+   "target": 149.6,
+   "err": 0.4,
    "ok": true
   },
   {
    "item": "top: footprint max radius (W/2)",
-   "model": 181.5,
+   "model": 175.5,
    "target": 180.0,
-   "err": 1.5,
-   "ok": true
+   "err": -4.5,
+   "ok": false
   }
  ],
- "sheet": null
+ "sheet": [
+  {
+   "view": "front",
+   "iou": 0.9115,
+   "top_err_m": 15.81,
+   "width_err_m": 13.89
+  },
+  {
+   "view": "back",
+   "iou": 0.9424,
+   "top_err_m": 15.22,
+   "width_err_m": 8.83
+  },
+  {
+   "view": "left",
+   "iou": 0.9144,
+   "top_err_m": 21.14,
+   "width_err_m": 12.75
+  },
+  {
+   "view": "right",
+   "iou": 0.9099,
+   "top_err_m": 20.29,
+   "width_err_m": 11.36
+  },
+  {
+   "view": "top",
+   "iou": 0.7842,
+   "top_err_m": 40.23,
+   "width_err_m": 61.9
+  },
+  {
+   "view": "section",
+   "iou": 0.8272,
+   "top_err_m": 35.56,
+   "width_err_m": 31.68
+  }
+ ]
 }

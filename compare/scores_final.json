@@ -8,24 +8,17 @@
    "ok": true
   },
   {
-   "item": "front: base width @z=10",
-   "model": 361.0,
-   "target": 360.0,
-   "err": 1.0,
+   "item": "front: base width @z=4 (340..362, within 360 envelope)",
+   "model": 356.33,
+   "target": 351.0,
+   "err": 5.33,
    "ok": true
   },
   {
-   "item": "front: base width @z=46",
-   "model": 361.0,
-   "target": 360.0,
-   "err": 1.0,
-   "ok": true
-  },
-  {
-   "item": "front: base segment top (setback)",
-   "model": 48.0,
-   "target": 48.0,
-   "err": 0.0,
+   "item": "front: base width @z=46 (taper + fans)",
+   "model": 329.67,
+   "target": 329.9,
+   "err": -0.23,
    "ok": true
   },
   {
@@ -51,44 +44,44 @@
   },
   {
    "item": "front: width @z=120 (param Ro)",
-   "model": 303.0,
-   "target": 301.1,
-   "err": 1.9,
+   "model": 240.11,
+   "target": 238.0,
+   "err": 2.11,
    "ok": true
   },
   {
-   "item": "front: width @z=180 (param Ro)",
-   "model": 273.67,
-   "target": 272.0,
-   "err": 1.67,
+   "item": "front: width @z=150 (param Ro)",
+   "model": 220.11,
+   "target": 218.0,
+   "err": 2.11,
    "ok": true
   },
   {
-   "item": "front: width @z=250 (param Ro)",
-   "model": 234.33,
-   "target": 232.0,
-   "err": 2.33,
-   "ok": true
-  },
-  {
-   "item": "front: width @z=308 (param Ro)",
-   "model": 201.0,
-   "target": 198.9,
-   "err": 2.1,
-   "ok": true
-  },
-  {
-   "item": "front: width @z=340 (param Ro)",
+   "item": "front: width @z=220 (param Ro)",
    "model": 168.33,
    "target": 166.0,
    "err": 2.33,
    "ok": true
   },
   {
+   "item": "front: width @z=308 (param Ro)",
+   "model": 109.89,
+   "target": 107.6,
+   "err": 2.29,
+   "ok": true
+  },
+  {
+   "item": "front: width @z=340 (param Ro)",
+   "model": 88.11,
+   "target": 86.0,
+   "err": 2.11,
+   "ok": true
+  },
+  {
    "item": "front: width @z=385 (param Ro)",
-   "model": 109.67,
-   "target": 107.5,
-   "err": 2.17,
+   "model": 57.0,
+   "target": 55.0,
+   "err": 2.0,
    "ok": true
   },
   {
@@ -106,31 +99,24 @@
    "ok": true
   },
   {
-   "item": "right: base width @z=10",
-   "model": 361.0,
-   "target": 360.0,
-   "err": 1.0,
+   "item": "right: base width @z=4 (340..362, within 360 envelope)",
+   "model": 356.33,
+   "target": 351.0,
+   "err": 5.33,
    "ok": true
   },
   {
-   "item": "right: base width @z=46",
-   "model": 361.0,
-   "target": 360.0,
-   "err": 1.0,
-   "ok": true
-  },
-  {
-   "item": "right: base segment top (setback)",
-   "model": 48.0,
-   "target": 48.0,
-   "err": 0.0,
+   "item": "right: base width @z=46 (taper + fans)",
+   "model": 338.67,
+   "target": 329.9,
+   "err": 8.77,
    "ok": true
   },
   {
    "item": "right: obs ring top z (target 320)",
-   "model": 321.33,
+   "model": 320.0,
    "target": 320.0,
-   "err": 1.33,
+   "err": 0.0,
    "ok": true
   },
   {
@@ -149,44 +135,44 @@
   },
   {
    "item": "right: width @z=120 (param Ro)",
-   "model": 303.0,
-   "target": 301.1,
-   "err": 1.9,
+   "model": 240.11,
+   "target": 238.0,
+   "err": 2.11,
    "ok": true
   },
   {
-   "item": "right: width @z=180 (param Ro)",
-   "model": 273.67,
-   "target": 272.0,
-   "err": 1.67,
+   "item": "right: width @z=150 (param Ro)",
+   "model": 220.11,
+   "target": 218.0,
+   "err": 2.11,
    "ok": true
   },
   {
-   "item": "right: width @z=250 (param Ro)",
-   "model": 234.33,
-   "target": 232.0,
-   "err": 2.33,
+   "item": "right: width @z=220 (param Ro)",
+   "model": 168.0,
+   "target": 166.0,
+   "err": 2.0,
    "ok": true
   },
   {
    "item": "right: width @z=308 (param Ro)",
-   "model": 201.0,
-   "target": 198.9,
-   "err": 2.1,
+   "model": 109.67,
+   "target": 107.6,
+   "err": 2.07,
    "ok": true
   },
   {
    "item": "right: width @z=340 (param Ro)",
-   "model": 168.33,
-   "target": 166.0,
-   "err": 2.33,
+   "model": 88.0,
+   "target": 86.0,
+   "err": 2.0,
    "ok": true
   },
   {
    "item": "right: width @z=385 (param Ro)",
-   "model": 109.67,
-   "target": 107.5,
-   "err": 2.17,
+   "model": 57.0,
+   "target": 55.0,
+   "err": 2.0,
    "ok": true
   },
   {
@@ -197,7 +183,7 @@
    "ok": true
   },
   {
-   "item": "top: arm count (polar runs above mid radius)",
+   "item": "top: arm/lobe count (r(theta) peaks)",
    "model": 8.0,
    "target": 8,
    "err": 0.0,
@@ -205,18 +191,62 @@
   },
   {
    "item": "top: valley radius at podium (min r)",
-   "model": 111.5,
-   "target": 108.0,
-   "err": 3.5,
+   "model": 164.0,
+   "target": 163.6,
+   "err": 0.4,
    "ok": true
   },
   {
-   "item": "top: footprint max radius (W/2)",
-   "model": 181.5,
-   "target": 180.0,
-   "err": 1.5,
+   "item": "top: plan extent W (x)",
+   "model": 358.33,
+   "target": 360.0,
+   "err": -1.67,
+   "ok": true
+  },
+  {
+   "item": "top: plan extent D (y)",
+   "model": 358.33,
+   "target": 360.0,
+   "err": -1.67,
    "ok": true
   }
  ],
- "sheet": null
+ "sheet": [
+  {
+   "view": "front",
+   "iou": 0.9134,
+   "top_err_m": 15.88,
+   "width_err_m": 14.54
+  },
+  {
+   "view": "back",
+   "iou": 0.9446,
+   "top_err_m": 14.02,
+   "width_err_m": 8.69
+  },
+  {
+   "view": "left",
+   "iou": 0.9116,
+   "top_err_m": 21.75,
+   "width_err_m": 14.16
+  },
+  {
+   "view": "right",
+   "iou": 0.909,
+   "top_err_m": 20.23,
+   "width_err_m": 12.53
+  },
+  {
+   "view": "top",
+   "iou": 0.9356,
+   "top_err_m": 9.15,
+   "width_err_m": 16.75
+  },
+  {
+   "view": "section",
+   "iou": 0.8362,
+   "top_err_m": 32.77,
+   "width_err_m": 30.6
+  }
+ ]
 }

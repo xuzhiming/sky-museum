@@ -1,5 +1,5 @@
 """Interior: floor slabs with the Ø80 atrium void, ring corridors, radial arm galleries, valley cores (stairs + lifts),
-central glass core (high-speed lifts) + bridges, atrium escalators L1-L5, golden ring installation, cloud-observation floors.
+atrium glass lifts L1<->L11, leaning central glass core L11-L30 (high-speed lifts), atrium escalators L1-L5, golden ring, tower floors.
 Also records a circulation spec (spaces / links / probes / stair flights) -> SPEC."""
 import math, numpy as np
 import params as P
@@ -10,7 +10,12 @@ from shapely.ops import unary_union
 SPEC = dict(spaces={}, links=[], flights=[], stairs=[], lifts=[], escalators=[])
 FL = P.floors()
 FLD = {n: (z, h, p) for n, z, h, p in FL}
-GAL = [f for f in FL if f[1] < 320.0]          # L1..L27 (atrium floors)
+GAL = [f for f in FL if f[1] < P.ATRIUM_TOP]   # L1..L10 (atrium floors with valley cores)
+UPF = [f for f in FL if f[1] >= P.ATRIUM_TOP]  # L11..L30 (tower floors around the central core)
+STAIR_ARMS = (2, 6)                             # upper stairs run along the E / W arms
+HS_ARMS = (0, 4)                                # central-core lift doors S / N
+ATR_LIFT_ARMS = (1, 3, 5, 7)                    # atrium glass lifts L1 <-> L11 on the diagonals
+def cc(z): return (0.0, P.yc(z))                # tower / core centre at height z (lean)
 RW = P.RING_WALL_R
 
 def frame(ang, r0=0.0):
@@ -118,15 +123,21 @@ def valley_stairs():
         out[k] = StairShaft('S%d' % k, core_frame(k), 2.5, (-6.7, -5.1), (-4.9, -3.3), bands, wall_v=-6.85)
     return out
 
-def spire_stairs():
-    out = {}
-    bands = [(320.0, 40.0), (360.0, 40.0)]
-    for k in (1, 5):
-        out[k] = StairShaft('SP%d' % k, frame(P.valley_angle(k), 0.0), 22.0, (-1.7, -0.1), (0.1, 1.7), bands)
+def upper_stairs():
+    """L11 -> L30: one shaft per floor band, frame origin on the (leaning) tower axis, running out along the E/W arms"""
+    out = {k: [] for k in STAIR_ARMS}
+    for i, (n, z, h, p) in enumerate(UPF[:-1]):
+        c = (0.0, UP_STACK_Y[0] if z < 320.0 else UP_STACK_Y[1])   # two vertical stacks (L11-L20, L21-L29) following the lean
+        for k in STAIR_ARMS:
+            a = P.arm_angle(k); ca, sa = math.cos(a), math.sin(a)
+            F = lambda u, v, c=c, ca=ca, sa=sa: (c[0] + u * ca - v * sa, c[1] + u * sa + v * ca)
+            out[k].append(StairShaft('SU%d_%s' % (k, n), F, UP_U0, (-1.7, -0.1), (0.1, 1.7), [(z, h)]))
     return out
+UP_U0 = P.CORE_R + 2.5
+UP_STACK_Y = (round(P.yc(250.0), 1), round(P.yc(370.0), 1))
 
 # ---------------------------------------------------------------- escalators
-ESC_SPEC = [('L1', 'L2', 0.0, 32.0), ('L2', 'L3', 90.0, 34.0), ('L3', 'L4', 180.0, 34.0), ('L4', 'L5', 270.0, 34.0)]
+ESC_SPEC = [('L1', 'L2', 0.0, 30.0), ('L2', 'L3', 90.0, 30.0), ('L3', 'L4', 180.0, 34.0), ('L4', 'L5', 270.0, 34.0)]
 def esc_geom(lo, hi, phi, d):
     z0 = FLD[lo][0]; z1 = FLD[hi][0]
     n = np.array([math.cos(math.radians(phi)), math.sin(math.radians(phi))]); tau = np.array([-n[1], n[0]])
@@ -181,42 +192,38 @@ def build_escalators(acc):
     return gaps
 
 # ---------------------------------------------------------------- per-floor build
-def floor_slab_geom(name, z, stairs, sp_stairs):
+def floor_slab_geom(name, z, stairs, up):
     g = Polygon(P.star(z, inset=0.35))
-    if name != 'L1':
-        if z < 320.0: g = g.difference(circle(P.ATRIUM_R, 96))
-        for k, S in stairs.items():
-            if z > S.bands[0][0] + 1e-6: g = g.difference(S.hole())
-    if name in ('L2', 'L3', 'L4', 'L5'):
-        g = g.difference(sbox(-P.ENTRANCE_W / 2 - 6, -400, P.ENTRANCE_W / 2 + 6, -P.Ro(0) + P.ENTRANCE_RECESS + 0.5))
-    if z >= 320.0:
-        g = g.difference(circle(P.CORE_R + 0.2, 32))
-        if name == 'L28': g = g.difference(circle(20.0, 48))
-        for k, S in sp_stairs.items():
-            if z > S.bands[0][0] + 1e-6: g = g.difference(S.hole())
+    if z < P.ATRIUM_TOP:
+        if name != 'L1':
+            g = g.difference(circle(P.ATRIUM_R, 96))
+            for k, S in stairs.items(): g = g.difference(S.hole())
+        if name in ('L2', 'L3', 'L4', 'L5'):
+            g = g.difference(sbox(-P.ENTRANCE_W / 2 - 6, -400, P.ENTRANCE_W / 2 + 6, -P.Ro(0) + P.ENTRANCE_RECESS + 0.5))
+        return g
+    if name == 'L11':
+        for k, S in stairs.items(): g = g.difference(S.hole())
+    g = g.difference(circle(P.CORE_R + 0.2, 40, *cc(z)))
+    for k, lst in up.items():
+        for S in lst:
+            if abs(S.bands[0][0] + S.bands[0][1] - z) < 1e-3: g = g.difference(S.hole())
     return g
 
 def build_interior(acc):
-    stairs = valley_stairs(); sp = spire_stairs()
+    stairs = valley_stairs(); up = upper_stairs()
     esc_gaps = build_escalators(acc)
-    bridge_angles = [P.arm_angle(k) for k in (0, 2, 4, 6)]
     space('plaza', 'outdoor', 'L0', (0, -205, 0))
     link('plaza', 'L1_arm0', 'door', probes=[dict(t='clear', a=(0, -P.Ro(0) + P.ENTRANCE_RECESS - 2.0), b=(0, -P.Ro(0) + P.ENTRANCE_RECESS + 2.0), z=0.0),
                                               dict(t='floor', p=(0, -P.Ro(0) - 4, 0)), dict(t='floor', p=(0, -P.Ro(0) + P.ENTRANCE_RECESS + 4, 0))])
     for idx, (name, z, h, prog) in enumerate(FL):
         zc = z + h - P.SLAB_T
         # ---- slab
-        g = floor_slab_geom(name, z, stairs if z <= 320.0 else {}, sp)
-        if z < 320.0 or name == 'L28':
-            slab(acc, 'Slabs', 'floor_stone' if name == 'L1' else 'floor_dark', g, z - P.SLAB_T, z, edge_mat='titanium')
-        else:
-            slab(acc, 'Slabs', 'floor_dark', g, z - P.SLAB_T, z, edge_mat='titanium')
-        if name == 'L28':
-            slab(acc, 'Slabs_Glass', 'glass_floor', circle(20.0, 48).difference(circle(P.CORE_R + 0.2, 32)), z - 0.3, z)
-        if z >= 320.0: obs_floor(acc, name, z, h, sp, stairs); continue
+        g = floor_slab_geom(name, z, stairs, up)
+        slab(acc, 'Slabs', 'floor_stone' if name == 'L1' else 'floor_dark', g, z - P.SLAB_T, z, edge_mat='titanium')
+        if z >= P.ATRIUM_TOP: upper_floor(acc, name, z, h, prog, up); continue
         # ---- atrium edge
         if name != 'L1':
-            gaps = [(a, 1.6) for a in esc_gaps.get(name, [])] + ([(a, 3.0) for a in bridge_angles] if name in P.BRIDGE_LEVELS else [])
+            gaps = [(a, 1.6) for a in esc_gaps.get(name, [])]
             ivs = rail_intervals(P.ATRIUM_R + 0.1, gaps)
             for a0, a1 in ivs:
                 arc_wall(acc, 'Rails', 'rail_glass', P.ATRIUM_R + 0.15, a0, a1, z, z + 1.1, t=0.06, seg_len=3.0)
@@ -279,29 +286,33 @@ def build_interior(acc):
         arc_band(acc, 'Lights_Amber', 'light_panel', RW - 4.0, RW - 3.4, 0, 2 * math.pi, zc - 0.02, down=True)
         for k in range(P.N_ARMS):
             arm_fitout(acc, name, z, h, k)
-    # stairs (geometry + vertical links)
+    # valley stairs L1 -> L11 (geometry + vertical links)
     for k, S in stairs.items():
-        S.build(acc); S.top_rails(acc, 320.0)
+        S.build(acc); S.top_rails(acc, P.ATRIUM_TOP)
         for i, (n, z, h, p) in enumerate(GAL):
             nxt = FL[i + 1][0]
-            dst = '%s_stair%d' % (nxt, k) if nxt != 'L28' else 'L28_hall'
+            dst = '%s_stair%d' % (nxt, k) if nxt in [g[0] for g in GAL] else '%s_hall' % nxt
             link('%s_stair%d' % (n, k), dst, 'stair', ref=S.sid, band=i)
-    for k, S in sp.items():
-        S.build(acc); S.top_rails(acc, 400.0)
-        link('L28_hall', 'L28_sp%d' % k, 'door', probes=[dict(t='clear', a=S.F(20.5, -0.9), b=S.F(23.5, -0.9), z=320.0), dict(t='floor', p=(*S.F(23.2, -0.9), 320.0))])
-        space('L28_sp%d' % k, 'stair_landing', 'L28', (*S.F(23.2, -0.9), 320.0))
-        link('L28_sp%d' % k, 'L29_sp%d' % k, 'stair', ref=S.sid, band=0)
-        link('L29_sp%d' % k, 'L29_hall', 'door', probes=[dict(t='clear', a=S.F(23.5, -0.9), b=S.F(20.5, -0.9), z=360.0), dict(t='floor', p=(*S.F(20.0, -0.9), 360.0))])
-        space('L29_sp%d' % k, 'stair_landing', 'L29', (*S.F(23.2, -0.9), 360.0))
-        link('L29_sp%d' % k, 'L30_hall', 'stair', ref=S.sid, band=1)
-    # passenger lifts (valley cores): serve L1..L27 + L28 hall
+    # upper stairs L11 -> L30 (one shaft per band)
+    for k, lst in up.items():
+        for i, S in enumerate(lst):
+            S.build(acc)
+            n0 = UPF[i][0]; n1 = UPF[i + 1][0]; z0 = UPF[i][1]; z1 = UPF[i + 1][1]
+            u0 = S.u0
+            lid = '%s_su%d' % (n0, k)
+            link('%s_hall' % n0, lid, 'door', probes=[dict(t='clear', a=S.F(u0 - 1.5, -0.9), b=S.F(u0 + 1.5, -0.9), z=z0), dict(t='floor', p=(*S.F(u0 + 1.2, -0.9), z0))])
+            space(lid, 'stair_landing', n0, (*S.F(u0 + 1.2, -0.9), z0))
+            link(lid, '%s_hall' % n1, 'stair', ref=S.sid, band=0)
+        lst[-1].top_rails(acc, UPF[-1][1])
+    # passenger lifts (valley cores): serve L1..L10 + L11 sky lobby
     for k in range(P.N_ARMS):
-        stops = ['%s_core%d' % (n, k) for n, z, h, p in GAL] + ['L28_hall']
+        stops = ['%s_core%d' % (n, k) for n, z, h, p in GAL] + ['L11_hall']
         for li, _ in enumerate(core_lifts(k)):
             SPEC['lifts'].append(dict(id='P%d_%d' % (k, li), kind='passenger', stops=stops))
+    atrium_lifts(acc)
     central_core(acc)
+    atrium_roof(acc)
     art_ring(acc)
-    bridges(acc)
     lobby_fitout(acc)
     return SPEC
 
@@ -346,63 +357,80 @@ def arm_fitout(acc, name, z, h, k):
     acc.cyl('Art', 'holo_cyan' if k % 2 else 'gold', *F(ri + 13.5, 0), z + 1.0, z + 3.4, 0.9, n=8, r1=0.2)
 
 def central_core(acc):
-    R = P.CORE_R; n = 24
+    """glass core L11 -> crown, centred on the leaning tower axis (stepped per floor), 4 high-speed lifts"""
+    R = P.CORE_R
     stops = {}
-    for nm in P.HS_STOPS: stops[nm] = FLD[nm][0]
-    bands = [(nm, z, h) for nm, z, h, p in FL]
-    door_ang = [P.arm_angle(k) for k in (0, 2, 4, 6)]
-    for nm, z, h in bands:
-        z1 = min(z + h, P.CROWN_Z)
-        if nm in stops:
-            cuts = [(a, 1.6 / R) for a in door_ang]
-            ivs = intervals_from_cuts(cuts)
-            for a0, a1 in ivs: arc_wall(acc, 'Core_Glass', 'glass_core', R, a0, a1, z, z1, t=0.12, seg_len=2.4)
+    door_ang = [P.arm_angle(k) for k in HS_ARMS]
+    for nm, z, h, p in UPF:
+        z1 = min(z + h, P.CROWN_Z); c = cc(z)
+        if nm in P.HS_STOPS:
+            for a0, a1 in intervals_from_cuts([(a, 1.6 / R) for a in door_ang]):
+                arc_wall(acc, 'Core_Glass', 'glass_core', R, a0, a1, z, z1, t=0.12, seg_len=2.4, c=c)
             for a in door_ang:
-                arc_wall(acc, 'Core_Glass', 'glass_core', R, a - 1.6 / R, a + 1.6 / R, z + 3.2, z1, t=0.12, seg_len=1.6)
-                F = frame(a, 0.0)
+                arc_wall(acc, 'Core_Glass', 'glass_core', R, a - 1.6 / R, a + 1.6 / R, z + 3.2, z1, t=0.12, seg_len=1.6, c=c)
+                F = cframe(a, c)
                 lbox(acc, 'Cores', 'door_lift_hs', F, R - 1.0, R - 0.85, -1.4, 1.4, z, z + 3.2)
                 lbox(acc, 'Lights_Cyan', 'strip_cyan', F, R - 0.85, R - 0.8, -1.55, 1.55, z + 3.15, z + 3.3)
-            sid = {'L1': 'L1_lobby', 'L11': 'L11_ring', 'L21': 'L21_ring'}.get(nm, '%s_hall' % nm)
-            stops[nm] = sid
+            stops[nm] = '%s_hall' % nm
         else:
-            arc_wall(acc, 'Core_Glass', 'glass_core', R, 0, 2 * math.pi, z, z1, t=0.12, seg_len=2.4)
+            arc_wall(acc, 'Core_Glass', 'glass_core', R, 0, 2 * math.pi, z, z1, t=0.12, seg_len=2.4, c=c)
         for k in range(8):
             a = 2 * math.pi * k / 8
-            acc.bar('Shell_Frame', 'frame_metal', (R * math.cos(a), R * math.sin(a), z), (R * math.cos(a), R * math.sin(a), z1), 0.3, 0.3)
-        acc.cyl('Shell_Frame', 'frame_metal', 0, 0, z1 - 0.3, z1, R + 0.15, n=n, r1=R + 0.15, caps=False)
-    # 4 high-speed lift shafts inside + cabs
-    for k in range(4):
-        a = P.valley_angle(2 * k); F = frame(a, 0.0)
-        lbox(acc, 'Cores', 'lift_shaft', F, 3.2, 7.6, -2.2, 2.2, 0, P.CROWN_Z)
-        for zz in (30.0 + 70 * k, 150 + 50 * k):
-            lbox(acc, 'Lights_Amber', 'cab', F, 3.0, 7.8, -2.3, 2.3, zz, zz + 3.2)
+            acc.bar('Shell_Frame', 'frame_metal', (c[0] + R * math.cos(a), c[1] + R * math.sin(a), z), (c[0] + R * math.cos(a), c[1] + R * math.sin(a), z1), 0.3, 0.3)
+        acc.cyl('Shell_Frame', 'frame_metal', c[0], c[1], z1 - 0.3, z1, R + 0.15, n=24, r1=R + 0.15, caps=False)
+        for k in range(4):     # lift shafts (stepped with the core)
+            F = cframe(P.valley_angle(2 * k), c)
+            lbox(acc, 'Cores', 'lift_shaft', F, 2.2, 5.6, -1.7, 1.7, z, z1)
+    # glowing oculus: core underside seen from the atrium
+    acc.cyl('Lights_Cyan', 'holo_cyan', *cc(P.ATRIUM_TOP), P.ATRIUM_TOP - 0.7, P.ATRIUM_TOP - 0.6, R + 0.3, n=32, r1=R + 0.3)
     SPEC['lifts'].append(dict(id='HS', kind='high_speed', count=P.N_HS_LIFTS, stops=[stops[n] for n in P.HS_STOPS]))
 
-def bridges(acc):
-    for nm in P.BRIDGE_LEVELS:
-        z = FLD[nm][0]
-        for k in (0, 2, 4, 6):
-            a = P.arm_angle(k); F = frame(a, 0.0); w = P.BRIDGE_W / 2
-            lbox(acc, 'Bridges', 'floor_dark', F, P.CORE_R - 1.0, P.ATRIUM_R + 1.0, -w, w, z - 0.5, z)
-            for v in (-w, w):
-                wall(acc, 'Rails', 'rail_glass', F(P.CORE_R, v), F(P.ATRIUM_R + 0.2, v), z, z + 1.1, 0.06)
-                acc.bar('Lights_Cyan', 'strip_cyan', (*F(P.CORE_R, v), z + 1.12), (*F(P.ATRIUM_R, v), z + 1.12), 0.1, 0.06)
-            acc.bar('Lights_Amber', 'strip_amber', (*F(P.CORE_R, 0), z - 0.55), (*F(P.ATRIUM_R, 0), z - 0.55), 1.2, 0.05)
-            sid = '%s_ring' % nm
-            link(sid, 'HS_door_%s_%d' % (nm, k), 'bridge', probes=[dict(t='floor', p=(*F(P.CORE_R + 1.0, 0), z)), dict(t='floor', p=(*F(25.0, 0), z)), dict(t='floor', p=(*F(P.ATRIUM_R - 0.5, 0), z)),
-                                                                   dict(t='clear', a=F(P.ATRIUM_R - 1.5, 0), b=F(P.ATRIUM_R + 1.5, 0), z=z)])
-            space('HS_door_%s_%d' % (nm, k), 'lift_door', nm, (*F(P.CORE_R + 0.6, 0), z))
+def cframe(ang, c):
+    ca, sa = math.cos(ang), math.sin(ang)
+    return lambda u, v: (c[0] + u * ca - v * sa, c[1] + u * sa + v * ca)
+
+ATR_LIFT_R = 37.0
+def atrium_lifts(acc):
+    """4 glass lift shafts in the atrium on the diagonals, L1 lobby <-> L11 sky lobby (doors face the atrium centre)"""
+    zt = P.ATRIUM_TOP + 3.6
+    for k in ATR_LIFT_ARMS:
+        F = frame(P.arm_angle(k), 0.0)
+        u0, u1 = ATR_LIFT_R - 1.75, ATR_LIFT_R + 1.75
+        for (ua, ub, va, vb) in ((u0, u1, -1.75, -1.6), (u0, u1, 1.6, 1.75), (u1 - 0.15, u1, -1.75, 1.75)):
+            lbox(acc, 'Core_Glass', 'glass_core', F, ua, ub, va, vb, 0.0, zt)
+        for zz, z1 in ((3.2, P.ATRIUM_TOP), (P.ATRIUM_TOP + 3.2, zt)):
+            lbox(acc, 'Core_Glass', 'glass_core', F, u0, u0 + 0.15, -1.75, 1.75, zz, z1)
+        lbox(acc, 'Shell_Frame', 'frame_metal', F, u0 - 0.1, u1 + 0.1, -1.85, 1.85, zt, zt + 0.4)
+        for zz in (0.0, P.ATRIUM_TOP):
+            lbox(acc, 'Cores', 'door_lift_hs', F, u0 + 0.15, u0 + 0.3, -1.3, 1.3, zz, zz + 3.0)
+            lbox(acc, 'Lights_Cyan', 'strip_cyan', F, u0 - 0.05, u0, -1.45, 1.45, zz + 3.0, zz + 3.15)
+        lbox(acc, 'Lights_Cyan', 'strip_cyan', F, u1 + 0.02, u1 + 0.1, -0.15, 0.15, 3.0, P.ATRIUM_TOP)
+        lbox(acc, 'Lights_Amber', 'cab', F, u0 + 0.3, u1 - 0.3, -1.4, 1.4, 60.0 + 30 * k, 63.0 + 30 * k)
+    SPEC['lifts'].append(dict(id='HA', kind='atrium_glass', count=len(ATR_LIFT_ARMS), stops=['L1_lobby', 'L11_hall']))
+
+def atrium_roof(acc):
+    """section A-A: the Ø80 atrium is closed at L11 by a faceted conical soffit rising to the core oculus"""
+    z0, z1 = P.ATRIUM_TOP - 9.0, P.ATRIUM_TOP - 0.7
+    r0, r1 = P.ATRIUM_R - 0.2, P.CORE_R + 0.4
+    c1 = cc(P.ATRIUM_TOP); n = 32
+    for i in range(n):
+        A, B = 2 * math.pi * i / n, 2 * math.pi * (i + 1) / n
+        q = [(r0 * math.cos(A), r0 * math.sin(A), z0), (r0 * math.cos(B), r0 * math.sin(B), z0),
+             (c1[0] + r1 * math.cos(B), c1[1] + r1 * math.sin(B), z1), (c1[0] + r1 * math.cos(A), c1[1] + r1 * math.sin(A), z1)]
+        acc.add_face('Atrium_Roof', 'titanium', q[::-1])
+        if i % 2 == 0:
+            acc.bar('Lights_Cyan', 'strip_cyan', (r0 * math.cos(A) * 0.995, r0 * math.sin(A) * 0.995, z0 - 0.05), (c1[0] + r1 * math.cos(A), c1[1] + r1 * math.sin(A), z1 - 0.05), 0.25, 0.08)
+    arc_band(acc, 'Lights_Amber', 'strip_amber', r0 - 0.6, r0, 0, 2 * math.pi, z0 - 0.05, down=True)
 
 def art_ring(acc):
-    z = P.ART_RING_Z
-    torus(acc, 'Art', 'gold', P.ART_RING_R, 1.1, (0, 0, z), tilt=(math.radians(9), 0), n=96, m=10)
-    torus(acc, 'Art', 'gold', P.ART_RING_R - 4.0, 0.6, (0, 0, z + 3.5), tilt=(math.radians(-14), math.radians(7)), n=80, m=8)
-    torus(acc, 'Art', 'strip_amber', P.ART_RING_R + 1.4, 0.18, (0, 0, z), tilt=(math.radians(9), 0), n=96, m=6)
-    for k in range(8):
-        a = 2 * math.pi * k / 8 + 0.2
-        x, y = P.ART_RING_R * math.cos(a), P.ART_RING_R * math.sin(a)
-        zz = z + y * math.sin(math.radians(9))
-        acc.bar('Art', 'frame_metal', (x, y, zz + 1.0), (x * 1.6, y * 1.6, 56.0 - 0.6), 0.06, 0.06)
+    """interior sheet: thick vertical golden ring Ø≈36 standing on the atrium floor (faces the entrance)"""
+    z = P.ART_RING_Z; Rt = P.ART_RING_R - 5.5
+    torus(acc, 'Art', 'gold', Rt, 5.5, (0, 0, z), tilt=(math.radians(90), 0), n=72, m=16)
+    torus(acc, 'Art', 'strip_amber', Rt - 5.6, 0.25, (0, -0.0, z), tilt=(math.radians(90), 0), n=48, m=6)
+    for s in (-1, 1):
+        torus(acc, 'Art', 'strip_cyan', Rt, 0.2, (0, s * 5.55, z), tilt=(math.radians(90), 0), n=72, m=5)
+    acc.box('Art', 'titanium', -6.0, -4.0, 0.0, 6.0, 4.0, z - P.ART_RING_R + 1.2)
+    arc_band(acc, 'Lights_Amber', 'strip_amber', 9.6, 10.0, 0, 2 * math.pi, 0.02)
 
 def lobby_fitout(acc):
     # reception desk (arc) + info pylon in the L1 lobby, front side of the atrium
@@ -413,18 +441,31 @@ def lobby_fitout(acc):
         acc.box('Exhibits', 'frame_dark', x - 1.5, -150, 0, x + 1.5, -149.4, 7.0)
         acc.add_face('Screens', 'screen_sign', [(x - 1.4, -150.05, 1.0), (x + 1.4, -150.05, 1.0), (x + 1.4, -150.05, 6.8), (x - 1.4, -150.05, 6.8)])
 
-def obs_floor(acc, name, z, h, sp, stairs):
+def upper_floor(acc, name, z, h, prog, up):
+    """L11-L30: open galleries around the leaning central core, display walls on the diagonal arms"""
+    c = cc(z); zc = z + h - P.SLAB_T; ri = P.Ri(z)
     sid = '%s_hall' % name
-    space(sid, 'observation', name, (-(P.Ri(z) - 8) * math.sin(0.2), -(P.Ri(z) - 8) * math.cos(0.2), z))
-    zc = z + h
-    # perimeter amber cove lights + seating plinths
-    pts = P.star(z, inset=3.0)
+    space(sid, 'sky_lobby' if name == 'L11' else ('observation' if name in ('L28', 'L29', 'L30') else 'gallery'), name, (c[0], c[1] - (P.CORE_R + 3.5), z), program=prog)
+    # perimeter amber cove + ceiling ring light
+    pts = P.star(z, inset=2.0)
     for a, b in zip(pts, pts[1:] + pts[:1]):
         acc.bar('Lights_Amber', 'strip_amber', (*a, z + 0.05), (*b, z + 0.05), 0.3, 0.1)
-    for k in range(P.N_ARMS):
-        if k in (1, 5) and name != 'L30': continue
-        a = P.arm_angle(k); F = frame(a, 0.0)
-        r = min(P.Ri(z) - 4, 28.0)
-        lbox(acc, 'Exhibits', 'titanium', F, r, r + 4.0, -1.5, 1.5, z, z + 0.5)
-    if name == 'L28':
-        arc_band(acc, 'Lights_Cyan', 'strip_cyan', 19.6, 20.0, 0, 2 * math.pi, z + 0.01)
+    # exhibits
+    r0, r1 = P.CORE_R + 6.0, ri - 3.0
+    for k in (1, 3, 5, 7):
+        F = cframe(P.arm_angle(k), c)
+        if r1 - r0 > 6.0 and h >= 9.0:
+            dh = min(6.0, h - 3.0)
+            lbox(acc, 'Exhibits', 'wall_light', F, r0, r1, -0.2, 0.2, z, z + dh)
+            m = ['art_a', 'art_b', 'art_c', 'art_d'][(k + int(z)) % 4]
+            for s_ in (-1, 1):
+                vv = s_ * 0.21; q = [(*F(r0 + 1, vv), z + 1.2), (*F(r1 - 1, vv), z + 1.2), (*F(r1 - 1, vv), z + dh - 0.8), (*F(r0 + 1, vv), z + dh - 0.8)]
+                acc.add_face('Art', m, q if s_ > 0 else q[::-1])
+            lbox(acc, 'Lights_Amber', 'strip_amber', F, r0, r1, -0.25, 0.25, z + dh, z + dh + 0.08)
+        elif r1 - r0 > 3.0:
+            rm = (r0 + r1) / 2
+            lbox(acc, 'Exhibits', 'titanium', F, rm - 1.5, rm + 1.5, -1.0, 1.0, z, z + 0.8)
+            acc.cyl('Art', 'holo_cyan' if k % 4 == 1 else 'gold', *F(rm, 0), z + 0.8, z + min(2.6, h - 1.5), 0.6, n=8, r1=0.15)
+    if name == 'L11':
+        for k in ATR_LIFT_ARMS:   # sky-lobby side of the atrium lifts
+            link(sid, 'L1_lobby', 'lift', ref='HA', probes=[dict(t='floor', p=(*frame(P.arm_angle(k), 0)(ATR_LIFT_R - 3.0, 0), z))])
