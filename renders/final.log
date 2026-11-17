@@ -1,0 +1,44 @@
+built in 7.6
+front done 30.6 s
+right done 33.1 s
+top done 45.4 s
+section done 60.2 s
+OK front: total height H                      model   420.00 target 420.0 err   0.00
+OK front: base width @z=10                    model   361.00 target 360.0 err   1.00
+OK front: base width @z=46                    model   361.00 target 360.0 err   1.00
+OK front: base segment top (setback)          model    48.00 target 48.0 err   0.00
+OK front: obs ring top z (target 320)         model   321.33 target 320.0 err   1.33
+OK front: obs ring top z (target 360)         model   361.33 target 360.0 err   1.33
+OK front: obs ring top z (target 400)         model   401.33 target 400.0 err   1.33
+OK front: width @z=120 (param Ro)             model   303.00 target 301.1 err   1.90
+OK front: width @z=180 (param Ro)             model   273.67 target 272.0 err   1.67
+OK front: width @z=250 (param Ro)             model   234.33 target 232.0 err   2.33
+OK front: width @z=308 (param Ro)             model   201.00 target 198.9 err   2.10
+OK front: width @z=340 (param Ro)             model   168.33 target 166.0 err   2.33
+OK front: width @z=385 (param Ro)             model   109.67 target 107.5 err   2.17
+OK front: spire present above 410 (top z)     model   420.00 target 420.0 err   0.00
+OK right: total height H                      model   420.00 target 420.0 err   0.00
+OK right: base width @z=10                    model   361.00 target 360.0 err   1.00
+OK right: base width @z=46                    model   361.00 target 360.0 err   1.00
+OK right: base segment top (setback)          model    48.00 target 48.0 err   0.00
+OK right: obs ring top z (target 320)         model   321.33 target 320.0 err   1.33
+OK right: obs ring top z (target 360)         model   361.33 target 360.0 err   1.33
+OK right: obs ring top z (target 400)         model   401.33 target 400.0 err   1.33
+OK right: width @z=120 (param Ro)             model   303.00 target 301.1 err   1.90
+OK right: width @z=180 (param Ro)             model   273.67 target 272.0 err   1.67
+OK right: width @z=250 (param Ro)             model   234.33 target 232.0 err   2.33
+OK right: width @z=308 (param Ro)             model   201.00 target 198.9 err   2.10
+OK right: width @z=340 (param Ro)             model   168.33 target 166.0 err   2.33
+OK right: width @z=385 (param Ro)             model   109.67 target 107.5 err   2.17
+OK right: spire present above 410 (top z)     model   420.00 target 420.0 err   0.00
+OK top: arm count (polar runs above mid radius) model     8.00 target 8 err   0.00
+OK top: valley radius at podium (min r)       model   111.50 target 108.0 err   3.50
+OK top: footprint max radius (W/2)            model   181.50 target 180.0 err   1.50
+sheet IoU: n/a (ref/calib.json + sheet image missing)
+hero done 76.9 s
+hero2 done 121.6 s
+atrium done 165.4 s
+gallery done 113.4 s
+obs done 106.4 s
+cutaway done 84.1 s
+ALLDONE

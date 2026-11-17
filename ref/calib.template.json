@@ -1,0 +1,8 @@
+{
+ "_note": "Copy to ref/calib.json after placing the design sheet at ref/sheet_exterior.png. Pixel coords are on the full sheet. crop = panel box; x_left/x_right = ends of the 360 m width dimension line; ground_y = ±0.000 line; top_y = +420 m line. Then: bash src/loop.sh r5",
+ "front": {"sheet": "ref/sheet_exterior.png", "crop": [0, 0, 0, 0], "x_left": 0, "x_right": 0, "span_m": 360, "ground_y": 0, "top_y": 0, "top_m": 420, "thr": 40},
+ "back":  {"sheet": "ref/sheet_exterior.png", "crop": [0, 0, 0, 0], "x_left": 0, "x_right": 0, "span_m": 360, "ground_y": 0, "top_y": 0, "top_m": 420, "thr": 40},
+ "left":  {"sheet": "ref/sheet_exterior.png", "crop": [0, 0, 0, 0], "x_left": 0, "x_right": 0, "span_m": 360, "ground_y": 0, "top_y": 0, "top_m": 420, "thr": 40},
+ "right": {"sheet": "ref/sheet_exterior.png", "crop": [0, 0, 0, 0], "x_left": 0, "x_right": 0, "span_m": 360, "ground_y": 0, "top_y": 0, "top_m": 420, "thr": 40},
+ "top":   {"sheet": "ref/sheet_exterior.png", "crop": [0, 0, 0, 0], "x_left": 0, "x_right": 0, "span_m": 360, "ground_y": 0, "top_y": 0, "top_m": 360, "thr": 40}
+}

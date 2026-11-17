@@ -1,0 +1,228 @@
+{
+ "spaces": 583,
+ "reachable": 583,
+ "reachable_walking": 583,
+ "unreachable": [],
+ "unreachable_walking": [],
+ "n_unreachable_walking": 0,
+ "links": 669,
+ "links_ok": 669,
+ "failed_links": [],
+ "spaces_without_floor": [],
+ "by_floor": {
+  "L0": [
+   1,
+   1
+  ],
+  "L1": [
+   21,
+   21
+  ],
+  "L2": [
+   21,
+   21
+  ],
+  "L3": [
+   21,
+   21
+  ],
+  "L4": [
+   21,
+   21
+  ],
+  "L5": [
+   21,
+   21
+  ],
+  "L6": [
+   21,
+   21
+  ],
+  "L7": [
+   21,
+   21
+  ],
+  "L8": [
+   21,
+   21
+  ],
+  "L9": [
+   21,
+   21
+  ],
+  "L10": [
+   21,
+   21
+  ],
+  "L11": [
+   25,
+   25
+  ],
+  "L12": [
+   21,
+   21
+  ],
+  "L13": [
+   21,
+   21
+  ],
+  "L14": [
+   21,
+   21
+  ],
+  "L15": [
+   21,
+   21
+  ],
+  "L16": [
+   21,
+   21
+  ],
+  "L17": [
+   21,
+   21
+  ],
+  "L18": [
+   21,
+   21
+  ],
+  "L19": [
+   21,
+   21
+  ],
+  "L20": [
+   21,
+   21
+  ],
+  "L21": [
+   25,
+   25
+  ],
+  "L22": [
+   21,
+   21
+  ],
+  "L23": [
+   21,
+   21
+  ],
+  "L24": [
+   21,
+   21
+  ],
+  "L25": [
+   21,
+   21
+  ],
+  "L26": [
+   21,
+   21
+  ],
+  "L27": [
+   21,
+   21
+  ],
+  "L28": [
+   3,
+   3
+  ],
+  "L29": [
+   3,
+   3
+  ],
+  "L30": [
+   1,
+   1
+  ]
+ },
+ "lifts": [
+  {
+   "id": "P0_0",
+   "kind": "passenger",
+   "stops": 28
+  },
+  {
+   "id": "P1_0",
+   "kind": "passenger",
+   "stops": 28
+  },
+  {
+   "id": "P1_1",
+   "kind": "passenger",
+   "stops": 28
+  },
+  {
+   "id": "P2_0",
+   "kind": "passenger",
+   "stops": 28
+  },
+  {
+   "id": "P3_0",
+   "kind": "passenger",
+   "stops": 28
+  },
+  {
+   "id": "P3_1",
+   "kind": "passenger",
+   "stops": 28
+  },
+  {
+   "id": "P4_0",
+   "kind": "passenger",
+   "stops": 28
+  },
+  {
+   "id": "P5_0",
+   "kind": "passenger",
+   "stops": 28
+  },
+  {
+   "id": "P5_1",
+   "kind": "passenger",
+   "stops": 28
+  },
+  {
+   "id": "P6_0",
+   "kind": "passenger",
+   "stops": 28
+  },
+  {
+   "id": "P7_0",
+   "kind": "passenger",
+   "stops": 28
+  },
+  {
+   "id": "P7_1",
+   "kind": "passenger",
+   "stops": 28
+  },
+  {
+   "id": "HS",
+   "kind": "high_speed",
+   "stops": 6
+  }
+ ],
+ "flights": 500,
+ "flights_ok": 500,
+ "flight_issues": [],
+ "min_headroom_stairs": 4.5,
+ "min_headroom_esc": 99.0,
+ "negative_probes": [
+  {
+   "name": "L12 arm0 -> outside through glass",
+   "blocked": true
+  },
+  {
+   "name": "L1 lobby -> outside through podium (arm2 side)",
+   "blocked": true
+  },
+  {
+   "name": "L5 corridor -> arm hall through ring wall",
+   "blocked": true
+  },
+  {
+   "name": "L3 corridor -> atrium void (balustrade)",
+   "blocked": true
+  }
+ ]
+}

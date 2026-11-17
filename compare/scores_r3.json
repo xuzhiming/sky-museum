@@ -1,0 +1,222 @@
+{
+ "dimension_check": [
+  {
+   "item": "front: total height H",
+   "model": 420.0,
+   "target": 420.0,
+   "err": 0.0,
+   "ok": true
+  },
+  {
+   "item": "front: base width @z=10",
+   "model": 361.0,
+   "target": 360.0,
+   "err": 1.0,
+   "ok": true
+  },
+  {
+   "item": "front: base width @z=46",
+   "model": 361.0,
+   "target": 360.0,
+   "err": 1.0,
+   "ok": true
+  },
+  {
+   "item": "front: base segment top (setback)",
+   "model": 48.0,
+   "target": 48.0,
+   "err": 0.0,
+   "ok": true
+  },
+  {
+   "item": "front: obs ring top z (target 320)",
+   "model": 321.33,
+   "target": 320.0,
+   "err": 1.33,
+   "ok": true
+  },
+  {
+   "item": "front: obs ring top z (target 360)",
+   "model": 361.33,
+   "target": 360.0,
+   "err": 1.33,
+   "ok": true
+  },
+  {
+   "item": "front: obs ring top z (target 400)",
+   "model": 401.33,
+   "target": 400.0,
+   "err": 1.33,
+   "ok": true
+  },
+  {
+   "item": "front: width @z=120 (param Ro)",
+   "model": 303.0,
+   "target": 301.1,
+   "err": 1.9,
+   "ok": true
+  },
+  {
+   "item": "front: width @z=180 (param Ro)",
+   "model": 273.67,
+   "target": 272.0,
+   "err": 1.67,
+   "ok": true
+  },
+  {
+   "item": "front: width @z=250 (param Ro)",
+   "model": 234.33,
+   "target": 232.0,
+   "err": 2.33,
+   "ok": true
+  },
+  {
+   "item": "front: width @z=308 (param Ro)",
+   "model": 201.0,
+   "target": 198.9,
+   "err": 2.1,
+   "ok": true
+  },
+  {
+   "item": "front: width @z=340 (param Ro)",
+   "model": 168.33,
+   "target": 166.0,
+   "err": 2.33,
+   "ok": true
+  },
+  {
+   "item": "front: width @z=385 (param Ro)",
+   "model": 109.67,
+   "target": 107.5,
+   "err": 2.17,
+   "ok": true
+  },
+  {
+   "item": "front: spire present above 410 (top z)",
+   "model": 420.0,
+   "target": 420.0,
+   "err": 0.0,
+   "ok": true
+  },
+  {
+   "item": "right: total height H",
+   "model": 420.0,
+   "target": 420.0,
+   "err": 0.0,
+   "ok": true
+  },
+  {
+   "item": "right: base width @z=10",
+   "model": 361.0,
+   "target": 360.0,
+   "err": 1.0,
+   "ok": true
+  },
+  {
+   "item": "right: base width @z=46",
+   "model": 361.0,
+   "target": 360.0,
+   "err": 1.0,
+   "ok": true
+  },
+  {
+   "item": "right: base segment top (setback)",
+   "model": 48.0,
+   "target": 48.0,
+   "err": 0.0,
+   "ok": true
+  },
+  {
+   "item": "right: obs ring top z (target 320)",
+   "model": 321.33,
+   "target": 320.0,
+   "err": 1.33,
+   "ok": true
+  },
+  {
+   "item": "right: obs ring top z (target 360)",
+   "model": 361.33,
+   "target": 360.0,
+   "err": 1.33,
+   "ok": true
+  },
+  {
+   "item": "right: obs ring top z (target 400)",
+   "model": 401.33,
+   "target": 400.0,
+   "err": 1.33,
+   "ok": true
+  },
+  {
+   "item": "right: width @z=120 (param Ro)",
+   "model": 303.0,
+   "target": 301.1,
+   "err": 1.9,
+   "ok": true
+  },
+  {
+   "item": "right: width @z=180 (param Ro)",
+   "model": 273.67,
+   "target": 272.0,
+   "err": 1.67,
+   "ok": true
+  },
+  {
+   "item": "right: width @z=250 (param Ro)",
+   "model": 234.33,
+   "target": 232.0,
+   "err": 2.33,
+   "ok": true
+  },
+  {
+   "item": "right: width @z=308 (param Ro)",
+   "model": 201.0,
+   "target": 198.9,
+   "err": 2.1,
+   "ok": true
+  },
+  {
+   "item": "right: width @z=340 (param Ro)",
+   "model": 168.33,
+   "target": 166.0,
+   "err": 2.33,
+   "ok": true
+  },
+  {
+   "item": "right: width @z=385 (param Ro)",
+   "model": 109.67,
+   "target": 107.5,
+   "err": 2.17,
+   "ok": true
+  },
+  {
+   "item": "right: spire present above 410 (top z)",
+   "model": 420.0,
+   "target": 420.0,
+   "err": 0.0,
+   "ok": true
+  },
+  {
+   "item": "top: arm count (polar runs above mid radius)",
+   "model": 8.0,
+   "target": 8,
+   "err": 0.0,
+   "ok": true
+  },
+  {
+   "item": "top: valley radius at podium (min r)",
+   "model": 111.5,
+   "target": 108.0,
+   "err": 3.5,
+   "ok": true
+  },
+  {
+   "item": "top: footprint max radius (W/2)",
+   "model": 181.5,
+   "target": 180.0,
+   "err": 1.5,
+   "ok": true
+  }
+ ],
+ "sheet": null
+}

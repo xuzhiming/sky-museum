@@ -1,0 +1,27 @@
+{
+ "tris": 366340,
+ "by_group": {
+  "Podium": 492,
+  "Shell_Frame": 65688,
+  "Shell_Glass": 1248,
+  "Lights_Amber": 35326,
+  "Lights_Cyan": 23440,
+  "Screens": 22,
+  "Portal": 72,
+  "Entrance_Glass": 36,
+  "Obs_Decks": 1440,
+  "Rails": 33168,
+  "Spire": 180,
+  "Ground": 2144,
+  "Escalators": 2796,
+  "Slabs": 15580,
+  "Walls": 55272,
+  "Cores": 4224,
+  "Exhibits": 7788,
+  "Art": 11648,
+  "Slabs_Glass": 320,
+  "Stairs": 96288,
+  "Core_Glass": 9072,
+  "Bridges": 96
+ }
+}

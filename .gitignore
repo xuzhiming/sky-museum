@@ -1,0 +1,4 @@
+*.blend1
+renders/ortho/*_mask_*.png
+renders/*_t*.png
+__pycache__/
