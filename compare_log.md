@@ -61,3 +61,9 @@ plus the parameter profile `Ro(z)` at 6 heights. Scores: `compare/scores_<tag>.j
 Residual / known deviations (to re-check against the sheet once it is available):
 * Arm-tip width, valley depth (`VALLEY_RATIO`), and the taper stations inside each segment (`RO_PROFILE` 180→168 setback at 48, 136 @180, 96 @320, 44 @400) are estimates, not read off the drawing.
 * Obs ring cantilevers (16/14/12 m) and the 400-410 glass crown + 410-420 spire split are assumptions.
+
+## Task 3 – detail pass regression check
+| tag | mean IoU | checks | note |
+|---|---|---|---|
+| d3 | 0.9088 | all OK | after rib depth 1.0 / joint size reduction (width tolerance 5 m: layered ribs stand ~2 m proud per side) |
+| final | 0.9088 | all OK | podium/fan M2/M4/M5 detail; lobe counter changed from peak picking to circular runs > valley+5 m (fan plateaus carry detail ripples that broke `find_peaks`) |

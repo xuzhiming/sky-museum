@@ -1,6 +1,8 @@
 import sys, os, math, argparse, time
 import bpy
 from mathutils import Vector
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import params as P
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 # orthographic elevation cameras. Scene: front = -Y side. ortho_scale covers 460 m.
 ORTHO = {   # name: (location, rotation_deg, ortho_scale, res)
@@ -48,11 +50,15 @@ def camera(loc, rot=None, target=None, lens=35, ortho=None):
     bpy.context.scene.camera = cam
     return cam
 
-def light(kind, loc, energy, col=(1, 1, 1), size=1.0, rot=None):
+def light(kind, loc, energy, col=(1, 1, 1), size=1.0, rot=None, target=None):
     ld = bpy.data.lights.new('L', kind); ld.energy = energy; ld.color = col
-    if hasattr(ld, 'shadow_soft_size'): ld.shadow_soft_size = size
+    if kind == 'AREA': ld.size = size
+    elif hasattr(ld, 'shadow_soft_size'): ld.shadow_soft_size = size
     ob = bpy.data.objects.new('L', ld); bpy.context.scene.collection.objects.link(ob); ob.location = loc
     if rot: ob.rotation_euler = [math.radians(a) for a in rot]
+    if target: ob.rotation_euler = (Vector(target) - Vector(loc)).to_track_quat('-Z', 'Y').to_euler()
+    ob.visible_camera = False; ob.visible_glossy = False if kind == 'AREA' else True
+    return ob
 
 def mask_override():
     m = bpy.data.materials.new('mask'); m.use_nodes = True; nt = m.node_tree
@@ -88,29 +94,117 @@ def render_to(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     bpy.context.scene.render.filepath = path; bpy.ops.render.render(write_still=True)
 
-def city(sc):
-    """low context blocks (render only, never exported)"""
-    import random; random.seed(3)
-    me = bpy.data.meshes.new('ctx'); verts = []; faces = []
-    for i in range(260):
-        a = random.uniform(0, 2 * math.pi); r = random.uniform(330, 1400)
-        da = (a - math.radians(-124) + math.pi) % (2 * math.pi) - math.pi
-        if abs(da) < math.radians(28) and r < 1100: continue
-        da2 = (a - math.radians(-80) + math.pi) % (2 * math.pi) - math.pi
-        if abs(da2) < math.radians(20) and r < 700: continue
-        x, y = r * math.cos(a), r * math.sin(a); w = random.uniform(20, 60); d = random.uniform(20, 60); h = random.uniform(20, 160) * (1.4 if r > 700 else 0.8)
-        o = len(verts)
-        verts += [(x, y, 0), (x + w, y, 0), (x + w, y + d, 0), (x, y + d, 0), (x, y, h), (x + w, y, h), (x + w, y + d, h), (x, y + d, h)]
-        faces += [(o, o + 1, o + 5, o + 4), (o + 1, o + 2, o + 6, o + 5), (o + 2, o + 3, o + 7, o + 6), (o + 3, o, o + 4, o + 7), (o + 4, o + 5, o + 6, o + 7)]
-    me.from_pydata(verts, [], faces); ob = bpy.data.objects.new('Context', me); sc.collection.objects.link(ob)
-    m = bpy.data.materials.new('ctx'); m.use_nodes = True; b = m.node_tree.nodes['Principled BSDF']
-    b.inputs['Base Color'].default_value = (0.02, 0.025, 0.04, 1); b.inputs['Emission Color'].default_value = (0.3, 0.5, 1.0, 1); b.inputs['Emission Strength'].default_value = 0.02
-    me.materials.append(m)
-    g = bpy.data.meshes.new('gnd'); g.from_pydata([(-3000, -3000, -0.7), (3000, -3000, -0.7), (3000, 3000, -0.7), (-3000, 3000, -0.7)], [], [(0, 1, 2, 3)])
-    go = bpy.data.objects.new('GroundCtx', g); sc.collection.objects.link(go)
-    gm = bpy.data.materials.new('gctx'); gm.use_nodes = True; gm.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (0.01, 0.012, 0.02, 1)
-    gm.node_tree.nodes['Principled BSDF'].inputs['Roughness'].default_value = 0.3
+def ground(sc, r=8000.0):
+    """clean studio ground: one dark glossy disc under the museum (no context buildings)"""
+    n = 96
+    vs = [(0, 0, -0.7)] + [(r * math.cos(2 * math.pi * i / n), r * math.sin(2 * math.pi * i / n), -0.7) for i in range(n)]
+    fs = [(0, 1 + i, 1 + (i + 1) % n) for i in range(n)]
+    g = bpy.data.meshes.new('gnd'); g.from_pydata(vs, [], fs)
+    go = bpy.data.objects.new('GroundStudio', g); sc.collection.objects.link(go)
+    gm = bpy.data.materials.new('gstudio'); gm.use_nodes = True; bs = gm.node_tree.nodes['Principled BSDF']
+    bs.inputs['Base Color'].default_value = (0.006, 0.007, 0.012, 1); bs.inputs['Roughness'].default_value = 0.22; bs.inputs['Metallic'].default_value = 0.0
     g.materials.append(gm)
+
+def bloom(sc, strength=0.55, threshold=1.2, size=0.62):
+    """compositor: bloom / glare for the neon strips"""
+    ng = bpy.data.node_groups.new('Comp', 'CompositorNodeTree'); sc.compositing_node_group = ng
+    ng.interface.new_socket('Image', in_out='OUTPUT', socket_type='NodeSocketColor')
+    rl = ng.nodes.new('CompositorNodeRLayers'); gl = ng.nodes.new('CompositorNodeGlare'); out = ng.nodes.new('NodeGroupOutput')
+    gl.inputs['Type'].default_value = 'Bloom'; gl.inputs['Quality'].default_value = 'High'
+    gl.inputs['Threshold'].default_value = threshold; gl.inputs['Strength'].default_value = strength; gl.inputs['Size'].default_value = size
+    ng.links.new(rl.outputs['Image'], gl.inputs['Image']); ng.links.new(gl.outputs['Image'], out.inputs[0])
+
+def night_world(sc, strength=1.0):
+    """sheet-style night backdrop for camera rays (screen-space gradient: violet horizon glow -> deep navy), dim navy for lighting"""
+    w = bpy.data.worlds.new('Night'); sc.world = w; w.use_nodes = True; nt = w.node_tree
+    bg = nt.nodes['Background']
+    tc = nt.nodes.new('ShaderNodeTexCoord'); sep = nt.nodes.new('ShaderNodeSeparateXYZ'); ramp = nt.nodes.new('ShaderNodeValToRGB')
+    nt.links.new(tc.outputs['Window'], sep.inputs['Vector']); nt.links.new(sep.outputs['Y'], ramp.inputs['Fac'])
+    el = ramp.color_ramp.elements
+    el[0].position = 0.0; el[0].color = (0.03, 0.022, 0.055, 1)
+    el[1].position = 1.0; el[1].color = (0.004, 0.007, 0.02, 1)
+    e = el.new(0.35); e.color = (0.022, 0.024, 0.06, 1)
+    lp = nt.nodes.new('ShaderNodeLightPath'); mix = nt.nodes.new('ShaderNodeMix'); mix.data_type = 'RGBA'
+    mix.inputs['B'].default_value = (0.0, 0.0, 0.0, 1)
+    nt.links.new(lp.outputs['Is Camera Ray'], mix.inputs['Factor'])
+    mix.inputs['A'].default_value = (0.012, 0.016, 0.035, 1)
+    nt.links.new(ramp.outputs['Color'], mix.inputs['B'])
+    nt.links.new(mix.outputs['Result'], bg.inputs['Color']); bg.inputs['Strength'].default_value = strength
+
+def uplights(scale=1.0):
+    """facade grazing: warm + cyan area uplights at the podium edge and a cool moon key"""
+    light('SUN', (0, 0, 500), 0.22, (0.55, 0.65, 1.0), rot=(62, 0, -35))
+    for k in range(8):
+        a = -math.pi / 2 + k * math.pi / 4 + math.pi / 8
+        r = 215.0
+        light('AREA', (r * math.cos(a), r * math.sin(a), 2.0), 2.5e5 * scale, (1.0, 0.72, 0.45) if k % 2 else (0.45, 0.8, 1.0), size=60,
+              target=(0.5 * r * math.cos(a), 0.5 * r * math.sin(a), 160.0))
+
+def dof(cam_ob, dist, fstop):
+    c = cam_ob.data; c.dof.use_dof = True; c.dof.focus_distance = dist; c.dof.aperture_fstop = fstop
+
+HD = (1920, 1080)
+def screen_backs():
+    """render-only: exterior LED media screens show a dark back panel when seen from inside (no mirrored art)"""
+    for m in bpy.data.materials:
+        if m.name not in ('screen_a', 'screen_b', 'screen_c', 'screen_d') or m.get('backs'): continue
+        nt = m.node_tree; out = nt.nodes['Material Output']; src = out.inputs['Surface'].links[0].from_socket
+        geo = nt.nodes.new('ShaderNodeNewGeometry'); dk = nt.nodes.new('ShaderNodeBsdfDiffuse')
+        dk.inputs['Color'].default_value = (0.01, 0.011, 0.013, 1)
+        mix = nt.nodes.new('ShaderNodeMixShader')
+        nt.links.new(geo.outputs['Backfacing'], mix.inputs[0]); nt.links.new(src, mix.inputs[1]); nt.links.new(dk.outputs[0], mix.inputs[2])
+        nt.links.new(mix.outputs[0], out.inputs['Surface']); m['backs'] = 1
+
+def beauty(v, tag, samples, scale):
+    """presentation renders: clean night backdrop + studio ground (no context city), AgX, denoise, bloom"""
+    R = lambda wh: (int(wh[0] * scale), int(wh[1] * scale))
+    sc = setup(samples=samples, res=R(HD))
+    sc.view_settings.exposure = 0.0
+    screen_backs()
+    out = None
+    if v == 'hero':
+        night_world(sc); ground(sc); uplights(); bloom(sc, 0.35, size=0.5)
+        camera((-95, -305, 1.6), target=(0, 0, 178), lens=15)   # low + close: tower fills the frame
+        out = 'hero_night'
+    elif v == 'entrance':
+        night_world(sc); ground(sc); uplights(0.6); bloom(sc, 0.55)
+        y0 = -P.Ro(0)
+        light('AREA', (0, y0 - 40, 1.0), 4e4, (1.0, 0.75, 0.5), size=30, target=(0, y0, 25))
+        cam = camera((34, y0 - 70, 2.2), target=(-2, y0, 26), lens=24); dof(cam, 75, 8.0)
+        out = 'entrance_closeup'
+    elif v == 'platform':
+        night_world(sc); ground(sc); uplights(0.5); bloom(sc, 0.6)
+        o = P.PODS[1]; z = o['z']
+        light('AREA', (o['x'] - 60, o['y'] - 80, z - 30), 2e5, (0.6, 0.8, 1.0), size=40, target=(o['x'], o['y'], z))
+        cam = camera((o['x'] - 105, o['y'] - 120, z - 16), target=(o['x'] + 8, o['y'], z - 4), lens=30); dof(cam, 150, 11.0)
+        out = 'platform_closeup'
+    elif v == 'atrium':
+        night_world(sc, 0.4); bloom(sc, 0.5)
+        for z in (90, 140): light('POINT', (0, 0, z), 3e4, (1.0, 0.75, 0.45), size=3)
+        for x in (-22, 22): light('POINT', (x, -14, 30), 2.5e4, (1.0, 0.6, 0.2), size=4)
+        light('POINT', (0, -30, 8), 6e4, (0.4, 0.8, 1.0), size=2)
+        light('AREA', (0, -20, 3), 3e4, (1.0, 0.8, 0.55), size=8, target=(0, 0, 20))
+        cam = camera((5, -50, 1.7), target=(0, 0, 24), lens=16); dof(cam, 50, 5.6)
+        out = 'atrium_interior'
+    elif v == 'gallery':
+        night_world(sc, 0.4); bloom(sc, 0.4); sc.view_settings.exposure = -1.6
+        z = 130.5
+        for rr in (60, 80, 100): light('POINT', (rr, 0, z + 8), 6e3, (1.0, 0.8, 0.55), size=2)
+        cam = camera((49, -3, z + 1.7), target=(110, 4, z + 3.5), lens=18); dof(cam, 25, 5.6)
+        out = 'gallery_typical'
+    elif v in ('elev_front', 'elev_side'):
+        sc.render.resolution_x, sc.render.resolution_y = R((1600, 1800))
+        night_world(sc); ground(sc); uplights(0.8); bloom(sc, 0.55)
+        if v == 'elev_front': camera((0, -1500, 212), rot=(90, 0, 0), ortho=470)
+        else: camera((1500, 0, 212), rot=(90, 0, 90), ortho=470)
+        out = 'elevation_front' if v == 'elev_front' else 'elevation_side'
+    elif v == 'cutaway':
+        night_world(sc); clip_y(0.0); bloom(sc, 0.4)
+        light('SUN', (0, 0, 500), 2.2, (0.85, 0.88, 1.0), rot=(55, 0, 20))
+        for z in (12, 60, 160, 260): light('POINT', (0, 10, z), 6e4, (1.0, 0.8, 0.6), size=3)
+        camera((-420, -620, 260), target=(0, 0, 190), lens=38)
+        out = 'section_cutaway'
+    render_to(os.path.join(OUT, 'renders/%s_%s.png' % (out, tag)))
 
 def run(views, tag, samples, scale):
     for v in views:
@@ -127,52 +221,12 @@ def run(views, tag, samples, scale):
         elif v in ORTHO:
             loc, rot, osc, res = ORTHO[v]
             sc = setup(samples=samples, res=(int(res[0] * scale), int(res[1] * scale)))
-            world(sc, strength=1.0)
+            night_world(sc); uplights(0.8); bloom(sc, 0.45)
             if v == 'section': clip_y(0.0)
-            light('SUN', (0, 0, 500), 0.6, (0.6, 0.7, 1.0), rot=(50, 0, 30))
             camera(loc, rot=rot, ortho=osc)
             render_to(os.path.join(OUT, 'renders/ortho/%s_%s.png' % (v, tag)))
-        elif v == 'hero':
-            sc = setup(samples=samples, res=(int(1920 * scale), int(1080 * scale)))
-            world(sc, strength=1.0); city(sc)
-            light('SUN', (0, 0, 500), 0.25, (0.5, 0.6, 1.0), rot=(60, 0, -40))
-            light('AREA', (0, -300, 5), 4e6, (0.3, 0.8, 1.0), size=200, rot=(70, 0, 0))
-            camera((-520, -760, 120), target=(0, 0, 175), lens=34)
-            render_to(os.path.join(OUT, 'renders/hero_night_%s.png' % tag))
-        elif v == 'hero2':
-            sc = setup(samples=samples, res=(int(1920 * scale), int(1080 * scale)))
-            world(sc, strength=1.0); city(sc)
-            light('SUN', (0, 0, 500), 0.25, (0.5, 0.6, 1.0), rot=(60, 0, -40))
-            camera((60, -330, 6), target=(0, -150, 60), lens=22)
-            render_to(os.path.join(OUT, 'renders/entrance_night_%s.png' % tag))
-        elif v == 'atrium':
-            sc = setup(samples=samples, res=(int(1920 * scale), int(1080 * scale)))
-            world(sc, strength=0.5)
-            for z in (90, 140): light('POINT', (0, 0, z), 3e4, (1.0, 0.75, 0.45), size=3)
-            for x in (-22, 22): light('POINT', (x, -14, 30), 2.5e4, (1.0, 0.6, 0.2), size=4)
-            light('POINT', (0, -30, 8), 6e4, (0.4, 0.8, 1.0), size=2)
-            camera((14, -46, 1.7), target=(0, 0, 22), lens=16)
-            render_to(os.path.join(OUT, 'renders/atrium_interior_%s.png' % tag))
-        elif v == 'gallery':
-            sc = setup(samples=samples, res=(int(1920 * scale), int(1080 * scale)))
-            world(sc, strength=0.5)
-            z = 130.5
-            for r in (60, 80, 100): light('POINT', (r, 0, z + 8), 2e4, (1.0, 0.8, 0.55), size=2)
-            camera((49, -3, z + 1.7), target=(110, 4, z + 3.5), lens=16)
-            render_to(os.path.join(OUT, 'renders/gallery_L8_%s.png' % tag))
-        elif v == 'obs':
-            sc = setup(samples=samples, res=(int(1920 * scale), int(1080 * scale)))
-            world(sc, strength=1.0); city(sc)
-            light('POINT', (0, -2, 370), 4e4, (1.0, 0.75, 0.5), size=3)
-            camera((-4, -2, 361.7), target=(30, -60, 352), lens=16)
-            render_to(os.path.join(OUT, 'renders/obs_L28_%s.png' % tag))
-        elif v == 'cutaway':
-            sc = setup(samples=samples, res=(int(1920 * scale), int(1080 * scale)))
-            world(sc, strength=1.0); clip_y(0.0)
-            light('SUN', (0, 0, 500), 2.2, (0.85, 0.88, 1.0), rot=(55, 0, 20))
-            for z in (12, 60, 160, 260): light('POINT', (0, 10, z), 6e4, (1.0, 0.8, 0.6), size=3)
-            camera((-420, -620, 260), target=(0, 0, 190), lens=38)
-            render_to(os.path.join(OUT, 'renders/section_cutaway_%s.png' % tag))
+        else:
+            beauty(v, tag, samples, scale)
         print(v, 'done', round(time.time() - t0, 1), 's', flush=True)
 
 if __name__ == '__main__':

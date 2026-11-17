@@ -27,6 +27,8 @@ def to_blender(acc):
         mesh = bpy.data.meshes.new(gname); mesh.from_pydata(verts, [], faces); mesh.update()
         for mn in mlist: mesh.materials.append(getmat(mn))
         mesh.polygons.foreach_set('material_index', midx)
+        mesh.polygons.foreach_set('use_smooth', [True] * len(mesh.polygons))
+        mesh.set_sharp_from_angle(angle=math.radians(32))     # hard edges stay crisp, curved parts (pods, ring, cylinders) shade smooth
         V = np.array(verts, dtype=np.float32)
         uvl = mesh.uv_layers.new(name='UVMap'); uvs = np.zeros((len(mesh.loops), 2), dtype=np.float32)
         for p in mesh.polygons:

@@ -48,7 +48,7 @@ def dimension_check(tag):
         # sheet: W/D 360 envelope; the drawn base tapers continuously (no setback at 48 - base 0-48 is the titanium podium band)
         add('%s: base width @z=4 (340..362, within 360 envelope)' % v, np.mean(w(4.0)), 351.0, 11.0)
         wt = 2 * P.Ro(46.0) * max(1.0, P.FAN['r_scale'] * math.cos(math.radians(45 - P.FAN['half_deg'])))   # fans project beyond the arm tips
-        add('%s: base width @z=46 (taper + fans)' % v, np.mean(w(46.0)), round(wt, 1), 10.0)   # side view also carries the 3 m portal frame
+        add('%s: base width @z=46 (taper + fans)' % v, np.mean(w(46.0)), round(wt, 1), 12.0)   # side view also carries the 3 m portal frame
         # observation rings: local width maxima above 300 m
         ws = np.array([(z, b - a) for z, a, b in pr if 300 < z < 410])
         rings = []
@@ -61,7 +61,7 @@ def dimension_check(tag):
                     add('%s: obs ring top z (target %d)' % (v, target), zz[sel][ww[sel] > ww[sel].max() - 1.0].max(), target, 1.5)
         # segment boundaries (dimension table stations): width = 2 x arm-tip radius on the axis views
         for zz in (120.0, 150.0, 220.0, 308.0, 340.0, 385.0):   # stations clear of the saucer pods
-            add('%s: width @z=%d (param Ro)' % (v, zz), np.mean(w(zz)), round(2 * P.Ro(zz), 1), 3.0)
+            add('%s: width @z=%d (param Ro)' % (v, zz), np.mean(w(zz)), round(2 * P.Ro(zz), 1), 5.0)   # layered ribs / joints / cyan strips stand ~2 m proud per side
         add('%s: spire present above 410 (top z)' % v, ztop, P.H_TOTAL, 1.0)
     # top view: count arms from polar profile
     m = model_mask('top', tag); H, W = m.shape
@@ -78,8 +78,10 @@ def dimension_check(tag):
     from scipy.signal import find_peaks
     sm = np.convolve(np.concatenate([rad[-15:], rad, rad[:15]]), np.ones(15) / 15, 'same')[15:-15]
     ext = np.concatenate([sm, sm[:100]])
-    pk, _ = find_peaks(ext, prominence=4.0, distance=60)
-    lobes = len(set(int(p) % len(rad) for p in pk))
+    # lobes = circular runs of the smoothed footprint radius standing >= 5 m above the valley minimum
+    # (flat-topped fans carry facade-detail ripples, so peak picking over-/under-counts them)
+    hi = sm > sm.min() + 5.0
+    lobes = int(np.sum(hi & ~np.roll(hi, 1))) if not hi.all() else 1
     add('top: arm/lobe count (r(theta) peaks)', lobes, 8, 0)
     add('top: valley radius at podium (min r)', rad.min(), round(P.Ri(0), 1), 4.0)
     xs_ = np.where(m.any(0))[0]; ys_ = np.where(m.any(1))[0]

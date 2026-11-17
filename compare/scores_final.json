@@ -9,16 +9,16 @@
   },
   {
    "item": "front: base width @z=4 (340..362, within 360 envelope)",
-   "model": 356.33,
+   "model": 358.33,
    "target": 351.0,
-   "err": 5.33,
+   "err": 7.33,
    "ok": true
   },
   {
    "item": "front: base width @z=46 (taper + fans)",
-   "model": 329.67,
+   "model": 330.33,
    "target": 329.9,
-   "err": -0.23,
+   "err": 0.43,
    "ok": true
   },
   {
@@ -44,23 +44,23 @@
   },
   {
    "item": "front: width @z=120 (param Ro)",
-   "model": 240.11,
+   "model": 240.78,
    "target": 238.0,
-   "err": 2.11,
+   "err": 2.78,
    "ok": true
   },
   {
    "item": "front: width @z=150 (param Ro)",
-   "model": 220.11,
+   "model": 220.33,
    "target": 218.0,
-   "err": 2.11,
+   "err": 2.33,
    "ok": true
   },
   {
    "item": "front: width @z=220 (param Ro)",
-   "model": 168.33,
+   "model": 169.0,
    "target": 166.0,
-   "err": 2.33,
+   "err": 3.0,
    "ok": true
   },
   {
@@ -72,16 +72,16 @@
   },
   {
    "item": "front: width @z=340 (param Ro)",
-   "model": 88.11,
+   "model": 88.78,
    "target": 86.0,
-   "err": 2.11,
+   "err": 2.78,
    "ok": true
   },
   {
    "item": "front: width @z=385 (param Ro)",
-   "model": 57.0,
+   "model": 57.67,
    "target": 55.0,
-   "err": 2.0,
+   "err": 2.67,
    "ok": true
   },
   {
@@ -100,16 +100,16 @@
   },
   {
    "item": "right: base width @z=4 (340..362, within 360 envelope)",
-   "model": 356.33,
+   "model": 358.33,
    "target": 351.0,
-   "err": 5.33,
+   "err": 7.33,
    "ok": true
   },
   {
    "item": "right: base width @z=46 (taper + fans)",
-   "model": 338.67,
+   "model": 340.67,
    "target": 329.9,
-   "err": 8.77,
+   "err": 10.77,
    "ok": true
   },
   {
@@ -135,44 +135,44 @@
   },
   {
    "item": "right: width @z=120 (param Ro)",
-   "model": 240.11,
+   "model": 242.22,
    "target": 238.0,
-   "err": 2.11,
+   "err": 4.22,
    "ok": true
   },
   {
    "item": "right: width @z=150 (param Ro)",
-   "model": 220.11,
+   "model": 220.22,
    "target": 218.0,
-   "err": 2.11,
+   "err": 2.22,
    "ok": true
   },
   {
    "item": "right: width @z=220 (param Ro)",
-   "model": 168.0,
+   "model": 170.67,
    "target": 166.0,
-   "err": 2.0,
+   "err": 4.67,
    "ok": true
   },
   {
    "item": "right: width @z=308 (param Ro)",
-   "model": 109.67,
+   "model": 109.89,
    "target": 107.6,
-   "err": 2.07,
+   "err": 2.29,
    "ok": true
   },
   {
    "item": "right: width @z=340 (param Ro)",
-   "model": 88.0,
+   "model": 89.22,
    "target": 86.0,
-   "err": 2.0,
+   "err": 3.22,
    "ok": true
   },
   {
    "item": "right: width @z=385 (param Ro)",
-   "model": 57.0,
+   "model": 57.33,
    "target": 55.0,
-   "err": 2.0,
+   "err": 2.33,
    "ok": true
   },
   {
@@ -198,55 +198,55 @@
   },
   {
    "item": "top: plan extent W (x)",
-   "model": 358.33,
+   "model": 361.0,
    "target": 360.0,
-   "err": -1.67,
+   "err": 1.0,
    "ok": true
   },
   {
    "item": "top: plan extent D (y)",
-   "model": 358.33,
+   "model": 361.0,
    "target": 360.0,
-   "err": -1.67,
+   "err": 1.0,
    "ok": true
   }
  ],
  "sheet": [
   {
    "view": "front",
-   "iou": 0.9134,
-   "top_err_m": 15.88,
-   "width_err_m": 14.54
+   "iou": 0.9151,
+   "top_err_m": 15.79,
+   "width_err_m": 13.92
   },
   {
    "view": "back",
-   "iou": 0.9446,
-   "top_err_m": 14.02,
-   "width_err_m": 8.69
+   "iou": 0.945,
+   "top_err_m": 13.99,
+   "width_err_m": 8.57
   },
   {
    "view": "left",
-   "iou": 0.9116,
-   "top_err_m": 21.75,
-   "width_err_m": 14.16
+   "iou": 0.9097,
+   "top_err_m": 21.98,
+   "width_err_m": 14.86
   },
   {
    "view": "right",
-   "iou": 0.909,
-   "top_err_m": 20.23,
-   "width_err_m": 12.53
+   "iou": 0.9077,
+   "top_err_m": 20.49,
+   "width_err_m": 13.35
   },
   {
    "view": "top",
-   "iou": 0.9356,
-   "top_err_m": 9.15,
-   "width_err_m": 16.75
+   "iou": 0.9372,
+   "top_err_m": 7.88,
+   "width_err_m": 15.83
   },
   {
    "view": "section",
-   "iou": 0.8362,
-   "top_err_m": 32.77,
-   "width_err_m": 30.6
+   "iou": 0.8382,
+   "top_err_m": 32.5,
+   "width_err_m": 29.95
   }
  ]
 }

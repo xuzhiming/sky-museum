@@ -18,53 +18,94 @@ def star_at(z):
     return P.star(z)
 
 def build_exterior(acc):
+    import detail as D
     zs = shell_stations()
     n = 3 * P.N_ARMS
+    TI = ['ti_panel', 'ti_panel2', 'ti_panel3']; ARM = ['ti_armor', 'ti_armor2']
     for a, b in zip(zs, zs[1:]):
-        if b - a < 0.05:      # podium setback at 48: horizontal roof ring
-            ring = Polygon(P.star(a)).difference(Polygon(P.star(b)))
-            slab(acc, 'Podium', 'titanium', ring, a - 0.8, a, edge_mat='strip_cyan')
-            continue
         A, B = star_at(a), star_at(b)
         podium = b <= 48.0 + 1e-6
+        ca, cb = P.yc(a), P.yc(b)
+        hb = b - a
         for i in range(n):
             j = (i + 1) % n
-            pa0, pa1, pb0, pb1 = A[i], A[j], B[i], B[j]
+            pa0, pa1, pb1, pb0 = A[i], A[j], B[j], B[i]
+            Q = [np.array((*pa0, a)), np.array((*pa1, a)), np.array((*pb0, b)), np.array((*pb1, b))]   # P00 P10 P01 P11
+            mid = ((pa0[0] + pa1[0]) / 2, (pa0[1] + pa1[1]) / 2 - ca)
             kind = i % 3          # 0 tip face, 1 tip->valley, 2 valley->tip
             if podium:
                 if i == 0:        # front arm tip: entrance portal (full 48 m opening)
                     L = math.dist(pa0, pa1); f0 = (L - P.ENTRANCE_W) / 2 / L
                     for (s0, s1) in ((0, f0), (1 - f0, 1)):
                         acc.add_face('Podium', 'titanium', [(*lerp(pa0, pa1, s0), a), (*lerp(pa0, pa1, s1), a), (*lerp(pb0, pb1, s1), b), (*lerp(pb0, pb1, s0), b)])
+                        D.panels(acc, 'D_Panels', TI, *Q, mid, u0=s0, u1=s1, seed=i * 7 + a)
                     continue
-                acc.add_face('Podium', 'titanium', [(*pa0, a), (*pa1, a), (*pb1, b), (*pb0, b)])
+                SCR = (1, n - 1, 4, n - 4, 7, n - 7, 10, n - 10)   # faces carrying M2 media screens (see media_screens)
+                acc.add_face('Podium', 'titanium' if (kind == 0 or i in SCR) else 'glass_curtain', [(*pa0, a), (*pa1, a), (*pb1, b), (*pb0, b)])
+                nrm = D.quad_normal(*Q[:3], mid)
+                if kind == 0:     # podium arm tip: M4 angled armor + M5 cyan channel (as on the tower)
+                    D.panels(acc, 'D_Panels', ARM, *Q, mid, cw=4.0, ch=4.0, u0=0.0, u1=0.40, angled=True, seed=i * 7 + a)
+                    D.panels(acc, 'D_Panels', ARM, *Q, mid, cw=4.0, ch=4.0, u0=0.60, u1=1.0, angled=True, seed=i * 5 + a)
+                    for (u0, u1, off, mat, g) in ((0.44, 0.56, 0.12, 'strip_cyan', 'Lights_Cyan'), (0.40, 0.44, 0.9, 'struct_dark', 'Shell_Frame'), (0.56, 0.60, 0.9, 'struct_dark', 'Shell_Frame')):
+                        c4 = [D.bil(*Q, u, v) + nrm * off for u, v in ((u0, 0), (u1, 0), (u1, 1), (u0, 1))]
+                        acc.add_face(g, mat, [tuple(p) for p in c4])
+                elif i in SCR:    # screen-backed bay: dark armor behind the LED screen
+                    D.panels(acc, 'D_Panels', ARM, *Q, mid, cw=4.0, ch=4.0, angled=False, seed=i * 3 + a)   # flat: stays behind the screen
+                else:             # podium flanks: M4 armor fringe + M3 curtain-wall mullions + warm lobby glow floor by floor
+                    ua, ub = (0.30, 1.0) if kind == 1 else (0.0, 0.70)
+                    fa, fb = (0.0, 0.30) if kind == 1 else (0.70, 1.0)
+                    D.panels(acc, 'D_Panels', ARM, *Q, mid, cw=3.6, ch=4.0, u0=fa, u1=fb, angled=True, seed=i * 7 + a)
+                    D.mullion_grid(acc, *Q, mid, du=3.0, transoms=tuple(k / max(1, round(hb / 4.0)) for k in range(1, max(1, round(hb / 4.0)))), u0=ua, u1=ub, g='D_Mullions')
+                    zz = a + 3.6
+                    while zz < b - 0.5:   # mezzanine / exhibition-floor slab hints every ~4 m
+                        v1 = (zz - a) / hb; v0 = max(0.0, v1 - 1.0 / hb * (1.2 if D._h(i, zz) > 0.5 else 0.7))
+                        mat = 'room_warm_hi' if D._h(zz, i) > 0.7 else ('room_warm' if D._h(zz, i) > 0.3 else 'room_warm_lo')
+                        c4 = [D.bil(*Q, u, v) - nrm * 1.4 for u, v in ((ua, v0), (ub, v0), (ub, v1), (ua, v1))]
+                        acc.add_face('Lights_Amber', mat, [tuple(p) for p in c4][::-1])
+                        zz += 4.0
+            elif kind == 0:
+                # arm tip: M4 angled-cut armor either side of the M5 vertical light-strip channel
+                acc.add_face('Shell_Glass', 'ti_armor', [(*pa0, a), (*pa1, a), (*pb1, b), (*pb0, b)])
+                D.panels(acc, 'D_Panels', ARM, *Q, mid, cw=4.0, ch=4.5, u0=0.0, u1=0.40, angled=True, seed=i * 11 + a)
+                D.panels(acc, 'D_Panels', ARM, *Q, mid, cw=4.0, ch=4.5, u0=0.60, u1=1.0, angled=True, seed=i * 13 + a)
+                nrm = D.quad_normal(*Q[:3], mid)
+                for (u0, u1, off, mat, g) in ((0.43, 0.57, 0.12, 'strip_cyan', 'Lights_Cyan'), (0.40, 0.43, 0.9, 'struct_dark', 'Shell_Frame'), (0.57, 0.60, 0.9, 'struct_dark', 'Shell_Frame')):
+                    c4 = [D.bil(*Q, u, v) + nrm * off for u, v in ((u0, 0), (u1, 0), (u1, 1), (u0, 1))]
+                    acc.add_face(g, mat, [tuple(p) for p in c4])
             else:
                 acc.add_face('Shell_Glass', 'glass_curtain', [(*pa0, a), (*pa1, a), (*pb1, b), (*pb0, b)])
-                # vertical mullions
-                L = math.dist(pa0, pa1); nm = max(1, int(L / 7.0))
-                for m in range(1, nm):
-                    t = m / nm
-                    p0, p1 = lerp(pa0, pa1, t), lerp(pb0, pb1, t)
-                    acc.bar('Shell_Frame', 'frame_metal', (*p0, a), (*p1, b), 0.35, 0.5)
-            # horizontal floor band (every station) + warm floor-edge line seen through the glass
-            acc.bar('Shell_Frame', 'frame_metal', (*pa0, a), (*pa1, a), 0.9 if not podium else 0.5, 0.6)
-            if not podium:
-                s0 = np.array(pa0) * (1 - 0.8 / np.linalg.norm(pa0)); s1 = np.array(pa1) * (1 - 0.8 / np.linalg.norm(pa1))
+                ua, ub = (0.22, 1.0) if kind == 1 else (0.0, 0.78)
+                fa, fb = (0.0, 0.22) if kind == 1 else (0.78, 1.0)
+                D.panels(acc, 'D_Panels', ARM, *Q, mid, cw=3.6, ch=4.5, u0=fa, u1=fb, angled=True, seed=i * 17 + a)
+                D.mullion_grid(acc, *Q, mid, du=3.6, transoms=(0.5,) if hb > 7 else (), u0=ua, u1=ub, g='D_Mullions')
+                # floor-by-floor interior hint: warm ceiling cove just inside the glass (varying intensity per bay)
+                nrm = D.quad_normal(*Q[:3], mid)
+                r = D._h(i, a)
+                if b > 50 and r > 0.12:
+                    mat = 'room_warm_hi' if r > 0.75 else ('room_warm' if r > 0.35 else 'room_warm_lo')
+                    zc0 = max(0.0, (b - a - 2.6) / (b - a)); zc1 = (b - a - 0.9) / (b - a)
+                    c4 = [D.bil(*Q, u, v) - nrm * 1.4 for u, v in ((ua, zc0), (ub, zc0), (ub, zc1), (ua, zc1))]
+                    acc.add_face('Lights_Amber', mat, [tuple(p) for p in c4][::-1])
+            # horizontal floor band (every station)
+            acc.bar('Shell_Frame', 'struct_dark', (*pa0, a), (*pa1, a), 0.9 if not podium else 0.5, 0.7)
+            if not podium and kind != 0:
+                s0 = np.array(pa0) - np.array([0, ca]); s1 = np.array(pa1) - np.array([0, ca])
+                s0 = s0 * (1 - 0.8 / np.linalg.norm(s0)) + np.array([0, ca]); s1 = s1 * (1 - 0.8 / np.linalg.norm(s1)) + np.array([0, ca])
                 acc.add_face('Lights_Amber', 'strip_amber_soft', [(*s0, a + 0.05), (*s1, a + 0.05), (*s1, a + 0.45), (*s0, a + 0.45)])
-        # vertex ribs: arm tips (cyan strip) and valleys
+        # vertex ribs: arm tips = layered M1 ribs with cyan M5 strip, valleys = slim dark rib with amber line
         for i in range(n):
             kind = i % 3
             p0, p1 = A[i], B[i]
+            o = (p0[0], p0[1] - ca)
             if kind in (0, 1):
-                acc.bar('Shell_Frame', 'frame_dark', (*p0, a), (*p1, b), 1.6, 1.6)
-                if not podium:
-                    # cyan light strip slightly outward of the rib
-                    c0 = np.array(p0) * (1 + 0.9 / max(np.linalg.norm(p0), 1)); c1 = np.array(p1) * (1 + 0.9 / max(np.linalg.norm(p1), 1))
-                    acc.bar('Lights_Cyan', 'strip_cyan', (*c0, a), (*c1, b), 0.45, 0.45)
+                if True:
+                    D.rib(acc, (*p0, a), (*p1, b), o, depth=1.0)
+                    D.rib_joint(acc, (*p0, a), o, s=1.0 if a < 300 else 0.6)
             else:
-                acc.bar('Shell_Frame', 'frame_dark', (*p0, a), (*p1, b), 1.0, 1.0)
+                acc.bar('Shell_Frame', 'struct_dark', (*p0, a), (*p1, b), 1.0, 1.0)
                 if not podium and P.VALLEY_STRIPS:
-                    c0 = np.array(p0) * (1 + 0.6 / max(np.linalg.norm(p0), 1)); c1 = np.array(p1) * (1 + 0.6 / max(np.linalg.norm(p1), 1))
+                    c0 = np.array(p0) - np.array([0, ca]); c1 = np.array(p1) - np.array([0, cb])
+                    c0 = c0 * (1 + 0.6 / max(np.linalg.norm(c0), 1)) + np.array([0, ca]); c1 = c1 * (1 + 0.6 / max(np.linalg.norm(c1), 1)) + np.array([0, cb])
                     acc.bar('Lights_Amber', 'strip_amber', (*c0, a), (*c1, b), 0.3, 0.3)
     # amber horizontal light bands on the podium
     A = P.star(0)
@@ -82,54 +123,81 @@ def build_exterior(acc):
     plaza(acc)
 
 def media_screens(acc):
-    """large media screens on podium side faces (sheet: big LED screens on the base)"""
-    S = P.star(0); S48 = P.star(47.0)
+    """M2 display curtain wall: large LED media screens on the lower faces, deep bezel + cyan edge light + louvre fins"""
+    ZS0, ZS1 = 24.0, 46.0    # screen band kept inside one near-planar facade segment (the 0-24 m podium bulges ~4 m beyond a 0-47 chord)
+    S = P.star(ZS0); S48 = P.star(ZS1)
     n = 3 * P.N_ARMS
     picks = [(1, 'screen_a'), (n - 1, 'screen_b'), (4, 'screen_c'), (n - 4, 'screen_d'), (7, 'screen_b'), (n - 7, 'screen_a'), (10, 'screen_c'), (n - 10, 'screen_d')]
     for i, mat in picks:
         j = (i + 1) % n
-        z0, z1 = P.SCREEN_Z
-        def pt(t, z):
-            f = z / 47.0
+        z0, z1 = ZS0 + 1.0, P.SCREEN_Z[1]
+        def pt(t, z, off=0.5):
+            f = (min(z, ZS1) - ZS0) / (ZS1 - ZS0)
             a = lerp(S[i], S48[i], f); b = lerp(S[j], S48[j], f)
             p = np.array(lerp(a, b, t))
             nrm = np.array([b[1] - a[1], -(b[0] - a[0])]); nrm /= np.linalg.norm(nrm)
-            return (*(p + nrm * 0.5), z)
+            return (*(p + nrm * off), z)
+        z1 = min(z1, 46.0)
         t0, t1 = 0.12, 0.88
-        acc.add_face('Screens', mat, [pt(t0, z0), pt(t1, z0), pt(t1, z1), pt(t0, z1)])
-        # frame
+        acc.add_face('Screens', mat, [pt(t0, z0, 1.2), pt(t1, z0, 1.2), pt(t1, z1, 1.2), pt(t0, z1, 1.2)])
         for (ta, za, tb, zb) in ((t0, z0, t1, z0), (t0, z1, t1, z1), (t0, z0, t0, z1), (t1, z0, t1, z1)):
-            acc.bar('Shell_Frame', 'frame_dark', pt(ta, za), pt(tb, zb), 0.8, 0.8)
+            acc.bar('Shell_Frame', 'struct_dark', pt(ta, za, 1.4), pt(tb, zb, 1.4), 1.2, 1.6)
+            acc.bar('Lights_Cyan', 'strip_cyan', pt(ta, za, 2.25), pt(tb, zb, 2.25), 0.25, 0.1)
+        for k in range(1, 6):   # vertical LED module seams
+            t = t0 + (t1 - t0) * k / 6
+            acc.bar('Shell_Frame', 'struct_dark', pt(t, z0, 1.25), pt(t, z1, 1.25), 0.12, 0.1)
 
 def portal(acc):
-    """48 m main entrance portal at the south arm tip + recessed glass curtain with doors"""
+    """M6 entrance portal: stepped multi-layer frame with cyan reveals, gable crown, canopy with light grid, glazing grid, doors, sign"""
     y0 = -P.Ro(0.0); W = P.ENTRANCE_W; H = P.ENTRANCE_H; rec = P.ENTRANCE_RECESS
-    # jambs / returns
     for sx in (-1, 1):
         x = sx * W / 2
         acc.box('Portal', 'titanium', (x - 0.6) if sx < 0 else x, y0, 0, x if sx < 0 else (x + 0.6), y0 + rec, H)
-        # projecting frame fins with cyan inner strip
-        acc.box('Portal', 'frame_dark', x - 1.5 + sx * 1.5, y0 + 0.05, 0, x + 1.5 + sx * 1.5, y0 + 1.5, H)
-        acc.box('Lights_Cyan', 'strip_cyan', x - 0.25, y0 + 0.0, 0.2, x + 0.25, y0 + 0.1, H - 0.5)
-    acc.box('Portal', 'frame_dark', -W / 2 - 3.0, y0 + 0.05, H - 3.0, W / 2 + 3.0, y0 + 1.5, H)   # lintel fascia (flush, inside the 360 m envelope)
-    acc.box('Lights_Cyan', 'strip_cyan', -W / 2, y0 + 0.0, H - 3.4, W / 2, y0 + 0.1, H - 3.0)
-    acc.box('Lights_Amber', 'strip_amber', -W / 2, y0 + 1.5, H - 3.2, W / 2, y0 + rec - 0.3, H - 3.0)          # soffit glow
-    # recessed curtain wall with door opening
+        for k in range(3):      # stepped jambs (outer layers stand proud of the facade)
+            xa = x + sx * (0.6 + 2.2 * k); xb = xa + sx * 2.0
+            yb = y0 + 1.5 - 0.9 * k
+            acc.box('Portal', 'ti_armor' if k != 1 else 'struct_dark', min(xa, xb), yb - 1.6, 0, max(xa, xb), yb, H + 2.0 * k)
+            acc.box('Lights_Cyan', 'strip_cyan', min(xa, xb) + (0.0 if sx > 0 else 1.7), yb - 1.7, 0.3, max(xa, xb) - (1.7 if sx > 0 else 0.0), yb - 1.6, H + 2.0 * k - 0.3)
+        for k in range(4):      # vertical fins beside the portal
+            xf = sx * (W / 2 + 9.0 + 3.2 * k)
+            acc.box('Portal', 'struct_dark', xf - 0.35, y0 - 1.8, 0, xf + 0.35, y0 + 0.1, H - 6 - 4 * k)
+            acc.box('Lights_Amber', 'strip_amber', xf - 0.1, y0 - 1.85, 0.5, xf + 0.1, y0 - 1.8, H - 6.5 - 4 * k)
+    acc.box('Portal', 'struct_dark', -W / 2 - 6.6, y0 - 0.3, H - 3.0, W / 2 + 6.6, y0 + 1.5, H + 4.0)   # lintel
+    acc.box('Lights_Cyan', 'strip_cyan', -W / 2 - 6.0, y0 - 0.4, H - 2.2, W / 2 + 6.0, y0 - 0.3, H - 1.8)
+    # gable crown over the portal (pentagon frame, M6)
+    gx, gz0, gz1 = W / 2 + 7.0, H + 4.0, H + 22.0
+    for (pa, pb) in (((-gx, gz0), (0, gz1)), ((0, gz1), (gx, gz0))):
+        acc.bar('Portal', 'ti_armor', (pa[0], y0 - 1.0, pa[1]), (pb[0], y0 - 1.0, pb[1]), 2.6, 2.4)
+        acc.bar('Lights_Cyan', 'strip_cyan', (pa[0], y0 - 2.25, pa[1] - 0.8), (pb[0], y0 - 2.25, pb[1] - 0.8), 0.6, 0.1)
+    acc.add_face('Portal', 'struct_dark', [(-gx + 3, y0 + 0.2, gz0 + 0.6), (gx - 3, y0 + 0.2, gz0 + 0.6), (0, y0 + 0.2, gz1 - 2.0)])
+    acc.add_face('Screens', 'screen_sign', [(-9, y0 - 0.1, gz0 + 1.6), (9, y0 - 0.1, gz0 + 1.6), (9, y0 - 0.1, gz0 + 6.6), (-9, y0 - 0.1, gz0 + 6.6)])
+    # recessed glazing: mullion grid + transoms, doors
     yc = y0 + rec
     dw, dh = P.DOOR_W, P.DOOR_H
     for (x0, x1, z0, z1) in ((-W / 2, -dw / 2, 0, H), (dw / 2, W / 2, 0, H), (-dw / 2, dw / 2, dh, H)):
         acc.box('Entrance_Glass', 'glass_clear', x0, yc - 0.1, z0, x1, yc + 0.1, z1)
-    for x in np.linspace(-W / 2, W / 2, 7):
-        acc.box('Shell_Frame', 'frame_metal', x - 0.2, yc - 0.4, 0, x + 0.2, yc + 0.2, H)
-    for z in (dh, 16.0, 26.0, 36.0, 46.0):
-        acc.box('Shell_Frame', 'frame_metal', -W / 2, yc - 0.4, z - 0.2, W / 2, yc + 0.2, z + 0.2)
-    # canopy + sign screen
-    acc.box('Portal', 'frame_dark', -W / 2, y0 + 1.5, 10.0, W / 2, y0 + rec - 0.3, 10.8)        # inner canopy (inside the recess)
-    acc.box('Lights_Cyan', 'strip_cyan', -W / 2, y0 + 1.45, 10.0, W / 2, y0 + 1.55, 10.8)
-    acc.add_face('Screens', 'screen_sign', [(-12, yc - 0.35, 30), (12, yc - 0.35, 30), (12, yc - 0.35, 40), (-12, yc - 0.35, 40)])
+    for x in np.linspace(-W / 2, W / 2, 13):
+        acc.box('Shell_Frame', 'brushed', x - 0.15, yc - 0.5, 0 if abs(x) >= dw / 2 - 0.1 else dh, x + 0.15, yc + 0.2, H)
+    for z in [dh] + list(np.arange(10.0, H, 4.0)):
+        acc.box('Shell_Frame', 'brushed', -W / 2, yc - 0.45, z - 0.12, W / 2, yc + 0.2, z + 0.12)
+    for x in (-dw / 2 + 0.3, -0.15, dw / 2 - 0.3):  # door leaves frames
+        acc.box('Shell_Frame', 'struct_dark', x - 0.15, yc - 0.3, 0, x + 0.15, yc + 0.1, dh)
+    # canopy with underside light grid
+    acc.box('Portal', 'struct_dark', -W / 2 - 1.0, y0 - 4.0, 11.0, W / 2 + 1.0, y0 + rec - 0.3, 12.0)
+    acc.box('Lights_Cyan', 'strip_cyan', -W / 2 - 1.0, y0 - 4.1, 11.2, W / 2 + 1.0, y0 - 4.0, 11.8)
+    for x in np.linspace(-W / 2 + 2, W / 2 - 2, 6):
+        acc.box('Lights_Amber', 'light_panel', x - 0.8, y0 - 3.5, 10.95, x + 0.8, y0 + rec - 1.0, 11.0)
+    acc.add_face('Screens', 'screen_sign', [(-12, yc - 0.55, 30), (12, yc - 0.55, 30), (12, yc - 0.55, 40), (-12, yc - 0.55, 40)])
+    # entry plinth steps + lit bollards
+    for k in range(3):
+        acc.box('Ground', 'ti_panel', -W / 2 - 4 + k, y0 - 9 + 2 * k, 0.0, W / 2 + 4 - k, y0 + 0.2, 0.05 + 0.0 * k)
+    for sx in (-1, 1):
+        for k in range(5):
+            acc.cyl('Ground', 'strip_cyan', sx * (W / 2 + 3), y0 - 12 - 7 * k, 0, 1.1, 0.25, n=8)
 
 def fans(acc):
-    """diagonal fan wings L1-L5: annular sectors (outer arc follows Ro(z)) lofted up to FAN z1, titanium + glass bands"""
+    """diagonal fan wings L1-L5: annular sectors (outer arc follows Ro(z)); titanium panelised base, glass + mullions above 48"""
+    import detail as D
     f = P.FAN; hz = math.radians(f['half_deg'])
     zs = [z for z in P.STATIONS if z < f['z1']] + [f['z1']]
     m = 10
@@ -141,58 +209,109 @@ def fans(acc):
             inn = [(ri * math.cos(a0 + hz - 2 * hz * i / m), c + ri * math.sin(a0 + hz - 2 * hz * i / m)) for i in range(m + 1)]
             return out + inn
         for za, zb in zip(zs, zs[1:]):
-            A, B = ring(za), ring(zb); n = len(A)
+            A, B = ring(za), ring(zb); n = len(A); c = P.yc(za)
             for i in range(m):    # outer arc faces
-                mat = 'titanium' if zb <= 48.0 + 1e-6 else 'glass_curtain'
-                acc.add_face('Fans', mat, [(*A[i], za), (*A[i + 1], za), (*B[i + 1], zb), (*B[i], zb)])
+                Q = [np.array((*A[i], za)), np.array((*A[i + 1], za)), np.array((*B[i], zb)), np.array((*B[i + 1], zb))]
+                mid = ((A[i][0] + A[i + 1][0]) / 2, (A[i][1] + A[i + 1][1]) / 2 - c)
+                if zb <= 48.0 + 1e-6:
+                    nrm = D.quad_normal(*Q[:3], mid)
+                    if i in (0, m - 1, m // 2 - 1, m // 2):   # M4 angled armor columns (edges + centre pair)
+                        acc.add_face('Fans', 'ti_armor', [(*A[i], za), (*A[i + 1], za), (*B[i + 1], zb), (*B[i], zb)])
+                        D.panels(acc, 'D_Panels', ['ti_armor', 'ti_armor2'], *Q, mid, cw=3.2, ch=4.0, angled=True, seed=k * 100 + i + za)
+                        if i == m // 2:   # M5 cyan channel between the centre armor columns
+                            c4 = [D.bil(*Q, u, v) + nrm * 0.5 for u, v in ((0.0, 0), (0.08, 0), (0.08, 1), (0.0, 1))]
+                            acc.add_face('Lights_Cyan', 'strip_cyan', [tuple(p) for p in c4])
+                    else:                 # M3 curtain wall + warm exhibition glow, floor by floor
+                        acc.add_face('Fans', 'glass_curtain', [(*A[i], za), (*A[i + 1], za), (*B[i + 1], zb), (*B[i], zb)])
+                        hb = zb - za; nt = max(1, round(hb / 4.0))
+                        D.mullion_grid(acc, *Q, mid, du=3.0, transoms=tuple(t / nt for t in range(1, nt)), g='D_Mullions')
+                        zz = za + 3.6
+                        while zz < zb - 0.5:
+                            v1 = (zz - za) / hb; v0 = max(0.0, v1 - (1.2 if D._h(k, i, zz) > 0.5 else 0.7) / hb)
+                            mat = ['room_warm', 'room_warm_hi', 'room_warm_lo'][int(D._h(i, k, zz) * 3) % 3]
+                            acc.add_face('Lights_Amber', mat, [tuple(D.bil(*Q, u, v) - nrm * 1.4) for u, v in ((0, v0), (1, v0), (1, v1), (0, v1))][::-1])
+                            zz += 4.0
+                else:
+                    acc.add_face('Fans', 'glass_curtain', [(*A[i], za), (*A[i + 1], za), (*B[i + 1], zb), (*B[i], zb)])
+                    D.mullion_grid(acc, *Q, mid, du=3.6, transoms=(0.5,), g='D_Mullions')
+                    nrm = D.quad_normal(*Q[:3], mid)
+                    mat = ['room_warm', 'room_warm_hi', 'room_warm_lo'][int(D._h(k, i, za) * 3)]
+                    acc.add_face('Lights_Amber', mat, [tuple(D.bil(*Q, u, v) - nrm * 1.4) for u, v in ((0, 0.8), (1, 0.8), (1, 0.9), (0, 0.9))][::-1])
             for (i, j) in ((m, m + 1), (2 * m + 1, 0)):   # side faces
                 acc.add_face('Fans', 'titanium', [(*A[i], za), (*A[j], za), (*B[j], zb), (*B[i], zb)])
             for i in range(m):
-                acc.bar('Shell_Frame', 'frame_metal', (*A[i], za), (*A[i + 1], za), 0.8, 0.6)
-                acc.add_face('Lights_Amber', 'strip_amber_soft', [(A[i][0] * 0.997, A[i][1] * 0.997, za + 0.6), (A[i + 1][0] * 0.997, A[i + 1][1] * 0.997, za + 0.6), (A[i + 1][0] * 0.997, A[i + 1][1] * 0.997, za + 1.0), (A[i][0] * 0.997, A[i][1] * 0.997, za + 1.0)]) if za > 0 else None
+                acc.bar('Shell_Frame', 'struct_dark', (*A[i], za), (*A[i + 1], za), 0.8, 0.7)
+                if za > 0:
+                    acc.add_face('Lights_Amber', 'strip_amber_soft', [(A[i][0] * 0.997, A[i][1] * 0.997, za + 0.6), (A[i + 1][0] * 0.997, A[i + 1][1] * 0.997, za + 0.6), (A[i + 1][0] * 0.997, A[i + 1][1] * 0.997, za + 1.0), (A[i][0] * 0.997, A[i][1] * 0.997, za + 1.0)])
+        for i, mat in ((2, 'screen_a' if k < 4 else 'screen_c'), (m - 3, 'screen_d' if k < 4 else 'screen_b')):   # M2 media screens on the fan flanks
+            def sp(z, ii, off):
+                p = ring(z)[ii]; c = P.yc(z); d = np.array((p[0], p[1] - c)); d /= np.linalg.norm(d)
+                return (p[0] + d[0] * off, p[1] + d[1] * off, z)
+            z0s, z1s = 14.0, 40.0
+            acc.add_face('Screens', mat, [sp(z0s, i, 1.2), sp(z0s, i + 2, 1.2), sp(z1s, i + 2, 1.2), sp(z1s, i, 1.2)])
+            for (ia, za_, ib, zb_) in ((i, z0s, i + 2, z0s), (i, z1s, i + 2, z1s), (i, z0s, i, z1s), (i + 2, z0s, i + 2, z1s)):
+                acc.bar('Shell_Frame', 'struct_dark', sp(za_, ia, 1.4), sp(zb_, ib, 1.4), 1.0, 1.4)
+                acc.bar('Lights_Cyan', 'strip_cyan', sp(za_, ia, 2.15), sp(zb_, ib, 2.15), 0.22, 0.1)
         T = ring(f['z1'])
         slab(acc, 'Fans', 'titanium', Polygon(T), f['z1'] - 0.8, f['z1'], edge_mat='strip_cyan_soft')
-        for i in range(m + 1):
-            acc.bar('Shell_Frame', 'frame_dark', (*ring(0)[i], 0.0), (*T[i], f['z1']), 1.2, 1.2) if i in (0, m) else None
+        R0 = ring(0)
+        for i in (0, m):
+            D.rib(acc, (*R0[i], 0.0), (*T[i], f['z1']), (R0[i][0], R0[i][1]), depth=1.8)
 
 def pods(acc):
-    """3 saucer pods (exterior sheet) docked to tower floors: deck disc + conical underside + glass rail + pavilion + neck bridge"""
-    from shapes import arc_wall
-    FL = {n: z for n, z, h, p in P.floors()}
+    """3 saucer pods: titanium deck + node B ring module (glass balustrade, posts, fascia band, brackets, underside light rings),
+    ribbed conical underside, support struts to the tower, glass pavilion with mullions, neck bridge"""
+    import detail as D
     for o in P.PODS:
         z = o['z']; R = o['R']; x, y = o['x'], o['y']; t = o['t']
-        disc = circle(R, 72, x, y).difference(Polygon(P.star(z, inset=-0.3)))
-        slab(acc, 'Pods', 'titanium', disc, z - t, z, edge_mat='strip_cyan_soft')
-        n = 48; zb = z - t - R * 0.32; rb = R * 0.4
+        disc = circle(R, 96, x, y).difference(Polygon(P.star(z, inset=-0.3)))
+        slab(acc, 'Pods', 'ti_panel', disc, z - t, z, edge_mat='struct_dark')
+        n = 64; zb = z - t - R * 0.32; rb = R * 0.4
         for i in range(n):
             A, B = 2 * math.pi * i / n, 2 * math.pi * (i + 1) / n
             q = [(x + R * math.cos(A), y + R * math.sin(A), z - t), (x + R * math.cos(B), y + R * math.sin(B), z - t),
                  (x + rb * math.cos(B), y + rb * math.sin(B), zb), (x + rb * math.cos(A), y + rb * math.sin(A), zb)]
-            acc.add_face('Pods', 'frame_dark', q[::-1])
-        acc.cyl('Pods', 'frame_dark', x, y, zb - 0.5, zb, rb, n=24, r1=rb)
-        arc_band(acc, 'Lights_Cyan', 'strip_cyan', R - 1.6, R - 0.8, 0, 2 * math.pi, z - t - 0.05, down=True)
-        arc_wall(acc, 'Rails', 'rail_glass', R - 0.4, 0, 2 * math.pi, z, z + 1.3, t=0.06, seg_len=4.0, c=(x, y))
-        arc_wall(acc, 'Shell_Frame', 'frame_metal', R - 0.4, 0, 2 * math.pi, z + 1.25, z + 1.4, t=0.15, seg_len=4.0, c=(x, y))
-        arc_wall(acc, 'Shell_Glass', 'glass_curtain', R * 0.45, 0, 2 * math.pi, z, z + 6.0, t=0.1, seg_len=4.0, c=(x, y))
-        acc.cyl('Pods', 'titanium', x, y, z + 6.0, z + 6.8, R * 0.47, n=32, r1=R * 0.3)
+            acc.add_face('Pods', 'struct_dark', q[::-1])
+        for i in range(16):     # radial ribs on the cone
+            A = 2 * math.pi * i / 16
+            acc.bar('Pods', 'brushed', (x + (R - 0.8) * math.cos(A), y + (R - 0.8) * math.sin(A), z - t - 0.4), (x + rb * math.cos(A), y + rb * math.sin(A), zb - 0.2), 0.6, 0.6)
+        for rr, zz, mat in ((R * 0.8, z - t - R * 0.32 * 0.25 - 0.3, 'strip_cyan'), (R * 0.6, z - t - R * 0.32 * 0.55 - 0.3, 'strip_amber')):
+            D._arc_band_c(acc, mat, (x, y), rr - 0.3, rr + 0.3, zz)
+        acc.cyl('Pods', 'struct_dark', x, y, zb - 2.0, zb, rb, n=32, r1=rb * 0.8)
+        acc.cyl('Lights_Cyan', 'strip_cyan', x, y, zb - 2.1, zb - 2.0, rb * 0.8, n=32, r1=rb * 0.8)
+        D.ring_module(acc, (x, y), R, z, t, posts=2.5, brackets=12.0, r_in=R * 0.55, g='Pods', bracket_depth=2.5)
+        # glass pavilion
+        from shapes import arc_wall
+        Rp = R * 0.45
+        arc_wall(acc, 'Shell_Glass', 'glass_curtain', Rp, 0, 2 * math.pi, z, z + 6.0, t=0.1, seg_len=4.0, c=(x, y))
+        for i in range(int(2 * math.pi * Rp / 3.0)):
+            A = 2 * math.pi * i / int(2 * math.pi * Rp / 3.0)
+            acc.bar('Shell_Frame', 'brushed', (x + Rp * math.cos(A), y + Rp * math.sin(A), z), (x + Rp * math.cos(A), y + Rp * math.sin(A), z + 6.0), 0.18, 0.3)
+        D._arc_band_c(acc, 'room_warm_hi', (x, y), 1.0, Rp - 0.6, z + 5.9)
+        acc.cyl('Pods', 'ti_armor', x, y, z + 6.0, z + 6.9, Rp + 1.2, n=48, r1=Rp * 0.7)
+        acc.cyl('Lights_Cyan', 'strip_cyan', x, y, z + 6.0, z + 6.15, Rp + 1.25, n=48, r1=Rp + 1.25, caps=False)
+        # neck bridge + support struts back to the tower
         c = (0.0, P.yc(z)); d = math.hypot(x - c[0], y - c[1]); ux, uy = (x - c[0]) / d, (y - c[1]) / d
         p0 = (c[0] + ux * P.Ri(z) * 0.6, c[1] + uy * P.Ri(z) * 0.6); p1 = (x - ux * R * 0.5, y - uy * R * 0.5)
         w = 5.0; nx, ny = -uy * w, ux * w
-        acc.hexa('Pods', 'titanium', [(p0[0] - nx, p0[1] - ny, z - t), (p1[0] - nx, p1[1] - ny, z - t), (p0[0] + nx, p0[1] + ny, z - t), (p1[0] + nx, p1[1] + ny, z - t),
+        acc.hexa('Pods', 'ti_armor', [(p0[0] - nx, p0[1] - ny, z - t), (p1[0] - nx, p1[1] - ny, z - t), (p0[0] + nx, p0[1] + ny, z - t), (p1[0] + nx, p1[1] + ny, z - t),
                                      (p0[0] - nx, p0[1] - ny, z), (p1[0] - nx, p1[1] - ny, z), (p0[0] + nx, p0[1] + ny, z), (p1[0] + nx, p1[1] + ny, z)])
         acc.bar('Lights_Cyan', 'strip_cyan', (p0[0], p0[1], z - t - 0.1), (p1[0], p1[1], z - t - 0.1), 0.6, 0.1)
+        zs = z - t - R * 0.32 - 14.0; rs = P.Ro(zs) * 0.92
+        for s in (-1, 1):
+            q0 = (x - ux * rb * 0.6 + s * nx * 0.9, y - uy * rb * 0.6 + s * ny * 0.9, zb - 1.0)
+            q1 = (c[0] + ux * rs + s * nx * 2.0, c[1] + uy * rs + s * ny * 2.0, zs)
+            acc.bar('Pods', 'struct_dark', q0, q1, 1.4, 1.4)
+            acc.bar('Lights_Amber', 'strip_amber', (q0[0], q0[1], q0[2] - 0.75), (q1[0], q1[1], q1[2] - 0.75), 0.25, 0.1)
 
 def obs_rings(acc):
-    """slim observation ring decks at +320/+360/+400 (sheet labels), glass balustrade + under-glow"""
-    from shapes import arc_wall
+    """M3 observation ring decks at +320/+360/+400 (sheet labels): node B ring module"""
+    import detail as D
     for o in P.OBS:
         z = o['z']; c = (0.0, P.yc(z)); R = P.Ro(z) + o['cant']
-        disc = circle(R, 96, *c).difference(Polygon(P.star(z, inset=-0.2)))
-        slab(acc, 'Obs_Decks', 'titanium', disc, z - o['t'], z, edge_mat='strip_cyan_soft')
-        arc_band(acc, 'Lights_Cyan', 'strip_cyan', R - 1.6, R - 0.9, 0, 2 * math.pi, z - o['t'] - 0.05, down=True) if c == (0.0, 0.0) else None
-        arc_wall(acc, 'Rails', 'rail_glass', R - 0.4, 0, 2 * math.pi, z, z + 1.3, t=0.06, seg_len=4.0, c=c)
-        arc_wall(acc, 'Shell_Frame', 'frame_metal', R - 0.4, 0, 2 * math.pi, z + 1.25, z + 1.35, t=0.15, seg_len=4.0, c=c)
-        arc_wall(acc, 'Lights_Cyan', 'strip_cyan', R + 0.05, 0, 2 * math.pi, z - o['t'] + 0.3, z - o['t'] + 0.7, t=0.05, seg_len=4.0, c=c)
+        disc = circle(R, 128, *c).difference(Polygon(P.star(z, inset=-0.2)))
+        slab(acc, 'Obs_Decks', 'ti_panel', disc, z - o['t'], z, edge_mat='struct_dark')
+        D.ring_module(acc, c, R, z, o['t'], posts=2.5, brackets=7.5, r_in=P.Ro(z - 6.0) * 0.95, g='Obs_Decks', bracket_depth=5.0)
 
 def _surf_y(x, z):
     """front (-Y) shell surface y at (x, z)"""
@@ -221,18 +340,26 @@ def portal_frame(acc):
 
 def crown_spire(acc):
     zc = P.CROWN_Z; c = P.yc(zc)
-    slab(acc, 'Spire', 'titanium', Polygon(star_at(zc)), zc - 0.8, zc)
+    slab(acc, 'Spire', 'ti_armor', Polygon(star_at(zc)), zc - 0.8, zc, edge_mat='strip_cyan_soft')
     s = P.SPIRE
-    for sx in (-1, 1):     # twin needle blades
+    for sx in (-1, 1):     # twin needle blades: armor blade + collar rings + cyan edge + beacon
         x0 = sx * s['x']; y0 = P.yc(s['z0'])
         w, d = s['w0'] / 2, s['d0'] / 2
         q = [(x0 - w, y0 - d, s['z0']), (x0 + w, y0 - d, s['z0']), (x0 - w, y0 + d, s['z0']), (x0 + w, y0 + d, s['z0'])]
         xt, yt = x0 * 0.85, P.yc(s['z1'])
         t = [(xt - 0.3, yt - 0.4, s['z1']), (xt + 0.3, yt - 0.4, s['z1']), (xt - 0.3, yt + 0.4, s['z1']), (xt + 0.3, yt + 0.4, s['z1'])]
-        acc.hexa('Spire', 'titanium', q + t)
+        acc.hexa('Spire', 'ti_armor', q + t)
         acc.bar('Lights_Cyan', 'strip_cyan', (x0 - sx * w * 1.05, y0 - d * 0.5, s['z0']), (xt - sx * 0.35, yt, s['z1'] - 1.0), 0.3, 0.3)
+        acc.bar('Lights_Cyan', 'strip_cyan', (x0 + sx * w * 1.05, y0 + d * 0.5, s['z0']), (xt + sx * 0.35, yt, s['z1'] - 1.0), 0.3, 0.3)
+        for zz in np.arange(s['z0'] + 1.5, s['z1'] - 2.0, 2.0):
+            f = (zz - s['z0']) / (s['z1'] - s['z0'])
+            cx_ = x0 + (xt - x0) * f; cy_ = y0 + (yt - y0) * f; ww = w + (0.3 - w) * f + 0.25; dd = d + (0.4 - d) * f + 0.25
+            acc.box('Spire', 'brushed', cx_ - ww, cy_ - dd, zz, cx_ + ww, cy_ + dd, zz + 0.3)
         acc.cyl('Lights_Cyan', 'beacon', xt, yt, s['z1'] - 0.8, s['z1'], 0.45, n=8)
-    acc.cyl('Spire', 'frame_dark', 0, c, zc, zc + 6.0, 3.0, n=12, r1=1.0)
+    acc.cyl('Spire', 'struct_dark', 0, c, zc, zc + 6.0, 3.0, n=16, r1=1.0)
+    for zz in (zc + 1.0, zc + 3.0, zc + 5.0):
+        rr = 3.0 - 2.0 * (zz - zc) / 6.0
+        acc.cyl('Lights_Cyan', 'strip_cyan', 0, c, zz, zz + 0.2, rr + 0.1, n=16, r1=rr + 0.1, caps=False)
     acc.cyl('Lights_Cyan', 'holo_cyan', 0, c, zc + 6.0, 416.0, 0.8, n=8, r1=0.2)
 
 def plaza(acc):

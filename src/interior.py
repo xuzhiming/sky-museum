@@ -344,6 +344,18 @@ def arm_fitout(acc, name, z, h, k):
         return
     dh = min(5.5, h - 3.0)
     arts = ['art_a', 'art_b', 'art_c', 'art_d']
+    # typical gallery: free-standing display walls with framed art + picture lights, plinths with lit sculptures
+    for q, uu in enumerate(np.arange(RW + 10.0, ri - 12.0, 12.0)):
+        sgn = 1 if q % 2 else -1; v = sgn * 9.0
+        lbox(acc, 'Exhibits', 'wall_light', F, uu, uu + 7.0, v - 0.2, v + 0.2, z, z + dh)
+        vv = v - sgn * 0.21
+        qd = [(*F(uu + 0.8, vv), z + 1.3), (*F(uu + 6.2, vv), z + 1.3), (*F(uu + 6.2, vv), z + dh - 1.0), (*F(uu + 0.8, vv), z + dh - 1.0)]
+        acc.add_face('Art', arts[(k + q) % 4], qd if sgn < 0 else qd[::-1])
+        lbox(acc, 'Exhibits', 'frame_dark', F, uu + 0.6, uu + 6.4, vv - sgn * 0.08 - 0.04, vv - sgn * 0.08 + 0.04, z + 1.1, z + 1.3)
+        lbox(acc, 'Lights_Amber', 'light_panel', F, uu + 0.5, uu + 6.5, vv - sgn * 0.6 - 0.15, vv - sgn * 0.6 + 0.15, z + dh + 0.3, z + dh + 0.4)
+        lbox(acc, 'Exhibits', 'struct_dark', F, uu + 2.5, uu + 4.5, -1.0, 1.0, z, z + 1.0)
+        lbox(acc, 'Lights_Cyan', 'strip_cyan', F, uu + 2.45, uu + 4.55, -1.05, 1.05, z + 0.95, z + 1.0)
+        acc.cyl('Art', 'gold' if q % 2 else 'holo_cyan', *F(uu + 3.5, 0), z + 1.0, z + 2.8, 0.7, n=10, r1=0.1)
     for j, v in enumerate((-8.0, 8.0)):
         lbox(acc, 'Exhibits', 'wall_light', F, ri - 8, ri + 6, v - 0.2, v + 0.2, z, z + dh)
         m = arts[(k + j + int(z)) % 4]
@@ -430,6 +442,14 @@ def art_ring(acc):
     for s in (-1, 1):
         torus(acc, 'Art', 'strip_cyan', Rt, 0.2, (0, s * 5.55, z), tilt=(math.radians(90), 0), n=72, m=5)
     acc.box('Art', 'titanium', -6.0, -4.0, 0.0, 6.0, 4.0, z - P.ART_RING_R + 1.2)
+    # ornament: radial blades (gear teeth) around the outer rim + inner filigree ring, bronze/dark inlay
+    for i in range(72):
+        a = 2 * math.pi * i / 72; ca, sa = math.cos(a), math.sin(a)
+        for s_ in (-1, 1):
+            p0 = (ca * (Rt + 3.2), s_ * 4.2, z + sa * (Rt + 3.2)); p1 = (ca * (Rt + 6.4), s_ * 2.4, z + sa * (Rt + 6.4))
+            acc.bar('Art', 'bronze' if i % 2 else 'gold', p0, p1, 0.5, 0.35, up=(0, 1, 0))
+        acc.bar('Art', 'struct_dark', (ca * (Rt - 5.0), -2.5, z + sa * (Rt - 5.0)), (ca * (Rt - 6.2), 2.5, z + sa * (Rt - 6.2)), 0.35, 0.35) if i % 3 == 0 else None
+    torus(acc, 'Art', 'bronze', Rt + 5.6, 0.45, (0, 0, z), tilt=(math.radians(90), 0), n=96, m=6)
     arc_band(acc, 'Lights_Amber', 'strip_amber', 9.6, 10.0, 0, 2 * math.pi, 0.02)
 
 def lobby_fitout(acc):
@@ -450,6 +470,11 @@ def upper_floor(acc, name, z, h, prog, up):
     pts = P.star(z, inset=2.0)
     for a, b in zip(pts, pts[1:] + pts[:1]):
         acc.bar('Lights_Amber', 'strip_amber', (*a, z + 0.05), (*b, z + 0.05), 0.3, 0.1)
+    # ceiling cove lights near the facade (visible through the glass as floor-by-floor warm bands)
+    if h > 4.0:
+        cp = P.star(zc, inset=3.5)
+        for a, b in zip(cp, cp[1:] + cp[:1]):
+            acc.bar('Lights_Amber', 'light_panel', (*a, zc - 0.12), (*b, zc - 0.12), 0.8, 0.08)
     # exhibits
     r0, r1 = P.CORE_R + 6.0, ri - 3.0
     for k in (1, 3, 5, 7):

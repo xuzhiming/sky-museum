@@ -6,13 +6,23 @@ MATS = {
  'titanium':      ('titanium', None, 0, 0.45, 0.85, 1.0, 12.0),
  'frame_metal':   ((0.42, 0.44, 0.48), None, 0, 0.3, 1.0, 1.0, 4.0),
  'frame_dark':    ((0.06, 0.065, 0.08), None, 0, 0.4, 0.9, 1.0, 4.0),
- 'glass_curtain': ((0.02, 0.05, 0.09), (0.25, 0.45, 0.9), 0.06, 0.04, 0.5, 0.62, 4.0),
+ 'glass_curtain': ((0.015, 0.03, 0.05), None, 0, 0.03, 0.0, 0.42, 4.0),          # M-03 low-e glass (dark, reflective, see-through)
+ 'ti_armor':      ((0.20, 0.21, 0.24), None, 0, 0.32, 0.92, 1.0, 4.0),            # M-01 titanium alloy (armor plates)
+ 'ti_armor2':     ((0.25, 0.26, 0.29), None, 0, 0.26, 0.92, 1.0, 4.0),
+ 'ti_panel':      ((0.16, 0.17, 0.19), None, 0, 0.36, 0.9, 1.0, 4.0),             # M-01 cladding panels (tone variation)
+ 'ti_panel2':     ((0.13, 0.135, 0.15), None, 0, 0.30, 0.9, 1.0, 4.0),
+ 'ti_panel3':     ((0.20, 0.205, 0.22), None, 0, 0.42, 0.9, 1.0, 4.0),
+ 'brushed':       ((0.62, 0.63, 0.66), None, 0, 0.22, 1.0, 1.0, 4.0),             # M-02 brushed metal trim
+ 'struct_dark':   ((0.045, 0.05, 0.06), None, 0, 0.45, 0.9, 1.0, 4.0),            # M-05 dark structural metal
+ 'room_warm':     ((1.0, 0.62, 0.3), (1.0, 0.58, 0.26), 7.0, 0.5, 0.0, 1.0, 4.0), # interior ceiling coves seen through glass
+ 'room_warm_hi':  ((1.0, 0.7, 0.4), (1.0, 0.66, 0.34), 12.0, 0.5, 0.0, 1.0, 4.0),
+ 'room_warm_lo':  ((1.0, 0.55, 0.25), (1.0, 0.5, 0.2), 3.5, 0.5, 0.0, 1.0, 4.0),
  'glass_clear':   ((0.5, 0.7, 0.85), None, 0, 0.03, 0.0, 0.22, 4.0),
- 'glass_core':    ((0.45, 0.75, 0.95), (0.2, 0.6, 0.9), 0.15, 0.03, 0.0, 0.25, 4.0),
+ 'glass_core':    ((0.3, 0.55, 0.7), (0.2, 0.6, 0.9), 0.03, 0.03, 0.0, 0.14, 4.0),
  'glass_floor':   ((0.4, 0.7, 0.95), (0.2, 0.7, 1.0), 0.4, 0.03, 0.0, 0.35, 4.0),
- 'rail_glass':    ((0.6, 0.85, 1.0), (0.2, 0.7, 1.0), 0.05, 0.03, 0.0, 0.2, 4.0),
+ 'rail_glass':    ((0.25, 0.4, 0.5), (0.2, 0.7, 1.0), 0.02, 0.03, 0.0, 0.12, 4.0),
  'rail_metal':    ((0.55, 0.56, 0.6), None, 0, 0.3, 1.0, 1.0, 4.0),
- 'strip_cyan':    ((0.1, 0.9, 1.0), (0.05, 0.8, 1.0), 9.0, 0.4, 0.0, 1.0, 4.0),
+ 'strip_cyan':    ((0.1, 0.9, 1.0), (0.05, 0.8, 1.0), 14.0, 0.4, 0.0, 1.0, 4.0),
  'strip_cyan_soft': ((0.1, 0.8, 1.0), (0.1, 0.8, 1.0), 4.0, 0.4, 0.0, 1.0, 4.0),
  'strip_amber_soft': ((1.0, 0.6, 0.25), (1.0, 0.55, 0.2), 3.0, 0.4, 0.0, 1.0, 4.0),
  'strip_amber':   ((1.0, 0.62, 0.25), (1.0, 0.55, 0.18), 10.0, 0.4, 0.0, 1.0, 4.0),
@@ -22,7 +32,8 @@ MATS = {
  'door_lift':     ((0.1, 0.5, 0.6), (0.05, 0.6, 0.8), 1.5, 0.3, 0.6, 1.0, 4.0),
  'door_lift_hs':  ((0.6, 0.45, 0.2), (0.9, 0.6, 0.25), 1.2, 0.3, 0.9, 1.0, 4.0),
  'lift_shaft':    ((0.09, 0.1, 0.12), None, 0, 0.4, 0.7, 1.0, 4.0),
- 'gold':          ((1.0, 0.55, 0.12), (1.0, 0.42, 0.06), 1.6, 0.22, 1.0, 1.0, 4.0),
+ 'gold':          ((1.0, 0.62, 0.2), (1.0, 0.42, 0.06), 0.25, 0.18, 1.0, 1.0, 4.0),
+ 'bronze':        ((0.55, 0.3, 0.1), (1.0, 0.45, 0.1), 0.15, 0.3, 1.0, 1.0, 4.0),
  'holo_cyan':     ((0.2, 0.9, 1.0), (0.2, 0.9, 1.0), 6.0, 0.2, 0.0, 0.8, 4.0),
  'plaza':         ('floor_dark', None, 0, 0.35, 0.2, 1.0, 16.0),
  'floor_stone':   ('floor_stone', None, 0, 0.25, 0.3, 1.0, 8.0),
@@ -37,9 +48,25 @@ MATS = {
  'poche':         ((0.95, 0.5, 0.15), (0.95, 0.5, 0.15), 1.4, 0.8, 0.0, 1.0, 4.0),
 }
 for s in 'abcd':
-    MATS['screen_' + s] = ('screen_' + s, 'screen_' + s, 3.0, 0.3, 0.0, 1.0, 1.0)
+    MATS['screen_' + s] = ('screen_' + s, 'screen_' + s, 4.5, 0.3, 0.0, 1.0, 1.0)
     MATS['art_' + s] = ('art_' + s, 'art_' + s, 1.2, 0.5, 0.0, 1.0, 1.0)
 MATS['screen_sign'] = ('screen_sign', 'screen_sign', 3.0, 0.3, 0.0, 1.0, 1.0)
+
+DETAIL = {'bronze', 'titanium', 'ti_armor', 'ti_armor2', 'ti_panel', 'ti_panel2', 'ti_panel3', 'brushed', 'struct_dark', 'frame_dark', 'frame_metal', 'gold'}
+
+def surface_detail(nt, b, rough, brushed=False):
+    """roughness variation + micro normal detail (procedural; render only - glTF keeps the base values)"""
+    tc = nt.nodes.new('ShaderNodeTexCoord'); mp = nt.nodes.new('ShaderNodeMapping')
+    mp.inputs['Scale'].default_value = (1.0, 1.0, 40.0) if brushed else (1.0, 1.0, 1.0)
+    nt.links.new(tc.outputs['Object'], mp.inputs['Vector'])
+    nz = nt.nodes.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 0.35 if not brushed else 2.0; nz.inputs['Detail'].default_value = 6.0
+    nt.links.new(mp.outputs['Vector'], nz.inputs['Vector'])
+    rp = nt.nodes.new('ShaderNodeMapRange'); rp.inputs['To Min'].default_value = rough * 0.65; rp.inputs['To Max'].default_value = min(1.0, rough * 1.45)
+    nt.links.new(nz.outputs['Fac'], rp.inputs['Value']); nt.links.new(rp.outputs['Result'], b.inputs['Roughness'])
+    nz2 = nt.nodes.new('ShaderNodeTexNoise'); nz2.inputs['Scale'].default_value = 6.0 if not brushed else 30.0; nz2.inputs['Detail'].default_value = 4.0
+    nt.links.new(mp.outputs['Vector'], nz2.inputs['Vector'])
+    bm = nt.nodes.new('ShaderNodeBump'); bm.inputs['Strength'].default_value = 0.06 if not brushed else 0.1; bm.inputs['Distance'].default_value = 0.02
+    nt.links.new(nz2.outputs['Fac'], bm.inputs['Height']); nt.links.new(bm.outputs['Normal'], b.inputs['Normal'])
 
 _img = {}
 def img(name):
@@ -65,6 +92,11 @@ def make_material(name):
         b.inputs['Emission Strength'].default_value = es
     b.inputs['Roughness'].default_value = rough
     b.inputs['Metallic'].default_value = metal
+    if name in DETAIL:
+        surface_detail(nt, b, rough, brushed=(name == 'brushed'))
+    if name == 'glass_curtain':
+        b.inputs['Specular IOR Level'].default_value = 0.9
+        b.inputs['Coat Weight'].default_value = 0.6; b.inputs['Coat Roughness'].default_value = 0.02
     if alpha < 1.0:
         b.inputs['Alpha'].default_value = alpha
         try: m.surface_render_method = 'BLENDED'

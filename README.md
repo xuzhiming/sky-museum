@@ -21,3 +21,13 @@ Rebuild everything: `bash src/final.sh && bash src/rebuild_web.sh && python3 src
 * `python3 src/tune.py compare/tune/tune3.json` – coordinate-descent tuning of exterior params (log `compare/tune/`)
 * `bash src/final.sh` – final masks, ortho renders, checks, `compare/drawing_vs_model_final.png`, hero render
 * history and sheet conflicts: `compare_log.md`
+
+## Detail + presentation pass (task 3)
+* No context city: renders use a dark gradient night sky + glossy studio ground disc (`render.py: night_world / ground / uplights / bloom`).
+* Facade modules per sheet: M1 layered ribs + joints (`src/detail.py: rib, rib_joint`), M2 LED media screens with bezel / cyan edge (podium + fan flanks),
+  M3 curtain-wall mullion grids + floor-by-floor warm interior glow, M3/B ring module (posts, glass balustrade, fascia band, brackets, underside light rings),
+  M4 angled-cut chamfered armor panels with seams, M5 cyan strip channels, M6 stepped portal (jambs, fins, gable crown, canopy light grid, glazing grid).
+* Materials M-01..M-05 (`ti_armor*`, `brushed`, `glass_curtain`, `screen_*`/`strip_*`, `struct_dark`) with render-time roughness noise + bump (`mats.py: surface_detail`).
+* Presentation renders (Cycles, denoise, AgX, bloom; 1920×1080, elevations 1600×1800): `bash src/final_renders.sh final 128`
+  → `renders/{hero_night,entrance_closeup,platform_closeup,atrium_interior,gallery_typical,elevation_front,elevation_side}_final.png`
+* Web LOD: `model.glb` = full detail (LOD0); `model_lod1.glb` / `web/model_web.glb` drop the `D_*` facade-detail groups (panels, mullions).
