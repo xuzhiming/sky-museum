@@ -1,5 +1,9 @@
 # 云巅博物馆 · Cyberpunk Sky Museum (modeling test)
 
+**Live web preview:** https://xuzhiming.github.io/sky-museum/ (Three.js walk/orbit viewer, deployed by GitHub Actions → Pages from `web/`)
+
+![Hero night render](renders/hero_night_final.png)
+
 Procedural Blender (bpy 5.3, Python only) model + Three.js viewer, following the cyber_louvre workflow.
 
 | path | |
@@ -61,3 +65,7 @@ Rebuild everything: `bash src/final.sh && bash src/rebuild_web.sh && python3 src
 * Circulation spec: arm-0 spaces on L2–L5 now reference the floor that remains behind the void (4, −59); walk route L1 detours around the ring plinth.
 * Grade: AgX Punchy look, warm reflection dome, warm rim/key lights (one cool rim kept), 6 of 8 uplights warm, warmer metals
   (silver 0.80/0.76/0.70, warm gunmetal), amber coves/strips ~1.5× brighter, gold emission 0.6, ring key/back lights (`hood_glow`).
+
+## Deployment
+* `.github/workflows/pages.yml` publishes `web/preview.html` (as `index.html`, GLB embedded, three.js + meshopt decoder from jsDelivr) plus `web/model_web.glb` / `web/teleports.json` to GitHub Pages on every push to `main`.
+* Repo includes sources, `model.blend`, `model.glb` (full detail), final renders and compare images; excluded: `*.blend1`, `model_lod1.glb`, mask/test renders, logs, caches.

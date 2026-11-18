@@ -4,3 +4,10 @@ renders/*_t*.png
 __pycache__/
 model_lod1.glb
 renders/*.log
+*.blend@
+*.pyc
+.cache/
+node_modules/
+_site/
+renders/walk/*.webm
+*.mp4
